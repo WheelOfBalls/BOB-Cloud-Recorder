@@ -1,0 +1,50 @@
+# Stage 2 cloud recorder. Public read-only Kalshi and Deribit data; no secrets, no accounts, no orders.
+# Each run loops for about 5h40m, taking one snapshot per 5-minute slot, and pushes every snapshot to the
+# stage2-data branch. The cron fires every 20 minutes so that a run is almost always queued behind the
+# active one; the concurrency group keeps exactly one running and at most one waiting. GitHub cron can be
+# late or skipped, so a dropped trigger costs nothing unless several in a row are lost. Actual timings are
+# in data/cloud_loop.csv and in each snapshot.
+name: stage2-recorder
+
+on:
+  schedule:
+    - cron: "11,31,51 * * * *"   # off the top of the hour, when GitHub drops the most scheduled runs
+  workflow_dispatch:
+    inputs:
+      max_minutes:
+        description: "How long this run records (minutes). Use 12 for a quick test."
+        default: "340"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stage2-recorder
+  cancel-in-progress: false
+
+jobs:
+  record:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out the data branch
+        run: |
+          python3 - <<'EOF' || { echo "Recording window is over."; echo "over=true" >> "$GITHUB_ENV"; }
+          import datetime as dt, sys
+          end = dt.datetime.fromisoformat(open("stage2/end_utc.txt").read().strip())
+          sys.exit(0 if dt.datetime.now(dt.timezone.utc) < end else 1)
+          EOF
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin stage2-data >/dev/null; then
+            git fetch -q origin stage2-data
+            git worktree add -q -B stage2-data _data origin/stage2-data
+          else
+            git worktree add -q --orphan -b stage2-data _data
+          fi
+      - name: Record
+        if: env.over != 'true'
+        env:
+          BOB_CRON: ${{ github.event.schedule }}
+        run: python3 -I stage2/cloud_loop.py --data _data --max-minutes "${{ inputs.max_minutes || '340' }}"
