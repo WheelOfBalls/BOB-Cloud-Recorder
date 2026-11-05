@@ -1,0 +1,51 @@
+# Takes one real snapshot on GitHub's runners and fails if any request failed or came back empty.
+# Shows that Kalshi and Deribit answer from GitHub before the scheduled recorder is relied on.
+# Nothing is pushed; the snapshot is kept as a run artifact for 7 days.
+name: stage2-check
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  one-snapshot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Take one snapshot
+        env:
+          BOB_DATA_DIR: ${{ runner.temp }}/check/data
+          BOB_SOURCE: github-actions-check
+        run: python3 -I stage2/record_snapshot.py
+      - name: Check it
+        env:
+          D: ${{ runner.temp }}/check/data
+        run: |
+          python3 -I - <<'EOF'
+          import os, glob, gzip, json, sys
+          d = os.environ["D"]
+          for f in ("crash_log.txt", "hang_log.txt"):
+              p = os.path.join(d, f)
+              if os.path.exists(p) and open(p).read().strip(): print(f, open(p).read()); sys.exit(1)
+          fs = glob.glob(os.path.join(d, "*", "*.json.gz"))
+          if not fs: sys.exit("no snapshot written (past end_utc.txt?)")
+          s = json.load(gzip.open(fs[0], "rt"))
+          idx = lambda k: ((s[k].get("body") or {}).get("result") or {}).get("index_price")
+          n = {"deribit options": len(s["deribit"]["options"]), "KXBTCD markets": len(s["kxbtcd"]["markets"]),
+               "KXBTC markets": len(s["kxbtc"]["markets"]), "5pm books": len(s["books"])}
+          gap = abs(s["kxbtcd"]["t1"] - s["deribit"]["t1"])
+          print(json.dumps({"utc": s["utc"], "source": s["source"], **n, "index": [idx("index_before"), idx("index_after")],
+                            "deribit_kalshi_gap_s": round(gap, 2), "errors": s["errors"]}, indent=1))
+          bad = s["errors"] or not all([n["deribit options"], n["KXBTCD markets"], idx("index_before"), idx("index_after")])
+          sys.exit("FAILED: a source did not answer from this runner" if bad else 0)
+          EOF
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: check-snapshot
+          path: ${{ runner.temp }}/check/data
+          retention-days: 7
