@@ -39,7 +39,7 @@ def main():
     log = os.path.join(data, "cloud_loop.csv")
     run = os.environ.get("GITHUB_RUN_ID", "local"); ev = os.environ.get("GITHUB_EVENT_NAME", "manual")
     def note(*cols):
-        with open(log, "a") as f: f.write(",".join(str(c) for c in cols) + "\n")
+        with open(log, "a") as f: f.write(",".join(str(c).replace(",", ";") for c in cols) + "\n")  # the cron string has commas
     note("run_start", iso(started), run, ev, os.environ.get("BOB_CRON", ""), "", "")
     while True:
         target = next_slot(time.time() + 5)
