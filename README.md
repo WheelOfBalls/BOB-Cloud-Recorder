@@ -4,7 +4,7 @@ A second copy of the BOB crypto stage 2 recorder that runs in GitHub Actions, so
 
 ## How it runs
 
-- `.github/workflows/stage2-recorder.yml` fires every 20 minutes (`:11`, `:31`, `:51`). Only one run records at a time; one more waits in the queue.
+- `.github/workflows/stage2-recorder.yml`: each run queues its own successor as soon as it starts, and that successor waits in the concurrency group until the current run ends. Only one run records at a time; one more waits. The cron (`:11`, `:31`, `:51`) is only a backup, because GitHub fired it just a few times a day here.
 - Each run calls `stage2/cloud_loop.py`, which takes one snapshot per 5-minute slot at the Windows task's phase (`hh:m3:02` UTC) for about 5 h 40 min, then exits. The queued run takes over within a minute or so.
 - Every snapshot is committed and pushed to the `stage2-data` branch under `data/YYYY-MM-DD/HHMMSS.json.gz`, the same layout as the local `data/` folder.
 - Recording stops at `stage2/end_utc.txt` (2026-11-19 15:25 UTC). After that, runs exit at once. Disable the workflow in the Actions tab when done.
