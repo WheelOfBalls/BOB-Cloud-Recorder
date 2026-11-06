@@ -1,6 +1,6 @@
 # Stage 3 design: red-team review
 
-Written 2026-11-06 by Claude, acting as an independent skeptical reviewer of the design merged in PR #8 (`DESIGN.md`, `PREREGISTRATION_stage3_DRAFT.md`, `power_sim.py`). **Synthetic data only.** No stage 2 snapshot, price or outcome was opened, and nothing in stage 2 (pre-registration, analysis code, recorder) was touched. The pre-registration is still a **DRAFT** that only Mattias can approve.
+Written 2026-11-06 by Claude, acting as an independent skeptical reviewer of the design merged in PR #8 (`DESIGN.md`, `PREREGISTRATION_stage3.md`, `power_sim.py`). **Synthetic data only.** No stage 2 snapshot, price or outcome was opened, and nothing in stage 2 (pre-registration, analysis code, recorder) was touched. The pre-registration is still a **DRAFT** that only Mattias can approve.
 
 New simulation: [`power_sim_redteam.py`](power_sim_redteam.py), results in [`power_results_redteam.json`](power_results_redteam.json) (600 simulated days per cell, 4,000 resamples, seeds fixed in the script).
 
@@ -102,6 +102,6 @@ Both simulations resample days from a pool of 600 to 800 and treat the pool's me
 
 ## Edits made in this PR
 
-- `PREREGISTRATION_stage3_DRAFT.md`: request order; no look-ahead in p_opt; forward and difference step for hourly closes; where the hedge starts; row sync; fee rounding to be written in; clustering by close day; only T1 justifies a next stage; corrected expected power; block bootstrap and stale-quote split reported. Every edit is marked **[review]**. Still DRAFT.
+- `PREREGISTRATION_stage3.md`: request order; no look-ahead in p_opt; forward and difference step for hourly closes; where the hedge starts; row sync; fee rounding to be written in; clustering by close day; only T1 justifies a next stage; corrected expected power; block bootstrap and stale-quote split reported. Every edit is marked **[review]**. Still DRAFT.
 - `DESIGN.md`: a notice that its power figures are superseded by this file.
 - `power_sim_redteam.py` + results; CI runs its `--quick` check (an exact-truth Monte Carlo check and the timing bias check).

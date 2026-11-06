@@ -1,8 +1,8 @@
-# Crypto stage 3 pre-registration: DRAFT, NOT APPROVED
+# Crypto stage 3 pre-registration (approved 2026-11-06, before any stage 3 data)
 
-> **Status: DRAFT.** Written 2026-11-06 by Claude while stage 2 is still recording and every stage 2 price, outcome and result is unseen. **Mattias must approve this file before stage 3 starts.** Until then nothing here binds, the stage 3 recorder must not run, and any edit is free. On approval, change this banner to "Approved by Mattias on DATE", record the file's sha256 in `DESIGN.md`, and from then on change it only through the deviations log at the end.
+> **Status: approved by Mattias on 2026-11-06.** Written by Claude on 2026-11-06 while stage 2 was still recording and every stage 2 price, outcome and result was unseen. Mattias replied "approved" at 03:51 UTC to the draft as merged in PR #8, and at 03:55 UTC asked for approvals to be handled automatically while he was away. Under that instruction the red-team edits from PR #9 (marked **[review]**) and the fee rounding below were added before freezing. The diff against the text he approved is in the description of the pull request that froze this file (the commit after #9). **One material change he has not seen:** the approved draft said a 4¢ mispricing was detectable; the review puts the reliable minimum at about 6¢ (1¢ half spread). The gates are unchanged. The frozen file's sha256 is recorded in `DESIGN.md`. From now on this file changes only through the deviations log at the end.
 >
-> Design reasoning and the power simulation behind every number below: [`DESIGN.md`](DESIGN.md). Red-team review of this draft, with the corrected power estimate and the edits it made here: [`REVIEW.md`](REVIEW.md). Edits from that review are marked **[review]**; they are part of the draft, still unapproved.
+> Design reasoning and the power simulation behind every number below: [`DESIGN.md`](DESIGN.md). Red-team review of this draft, with the corrected power estimate and the edits it made here: [`REVIEW.md`](REVIEW.md). Edits from that review are marked **[review]**.
 
 Public read-only data only. No account, no authentication, no orders. Every trade below is simulated. Passing does not validate an edge; it justifies a small, separately approved paper-trading test with real latency.
 
@@ -35,7 +35,7 @@ Stage 2 asks whether Kalshi's 5pm KXBTCD contracts are mispriced against Deribit
 
 ## Fair value
 
-As stage 2, with its review fix: total variance w(k) fitted per expiry as a cubic in k = ln(K/F) on two-sided **out-of-the-money** mids (calls K ≥ F, puts K < F) with `mark_iv` present, at least 4 options. A close before the first expiry scales that expiry's w by τ_T/τ_1. Otherwise w is interpolated linearly in calendar time at fixed k. p_opt = (C(K − h) − C(K + h)) / (2h), with h = $50 for BTC (as stage 2) and h = $2.50 for ETH (the same share of spot, roughly). No intraday variance clock, no discount.
+As stage 2, with its review fix: total variance w(k) fitted per expiry as a cubic in k = ln(K/F) on two-sided **out-of-the-money** mids (calls K ≥ F, puts K < F) with `mark_iv` present, at least 4 options. A close before the first expiry scales that expiry's w by τ_T/τ_1. Otherwise w is interpolated linearly in calendar time at fixed k. p_opt = (C(K − h) − C(K + h)) / (2h), with the step h given below. No intraday variance clock, no discount.
 
 - **No look-ahead [review]:** p_opt uses only data whose request ended before the Kalshi request started. For a close before the first expiry the forward is `index_before`, not the expiry's `underlying_price` (that is the 08:00 forward, which is off by the futures basis, and the basis matters at minutes to close).
 - **Difference step [review]:** h = min($50, 0.1 · F · σ√τ) for BTC and min($2.50, 0.1 · F · σ√τ) for ETH, where σ√τ is the fitted at-the-money total sd to the close. A fixed $50 is about as wide as the whole distribution 5 minutes before an hourly close and smooths p_opt towards 50¢.
@@ -43,7 +43,7 @@ As stage 2, with its review fix: total variance w(k) fitted per expiry as a cubi
 ## Rows and the trade rule
 
 - **Rows:** valid snapshots × hourly markets with a two-sided quote, mid in [0.06, 0.94], and 2 to 60 minutes to close.
-- Taker fee f(q) = 0.07·q·(1 − q), the schedule current at the start. **[check the fee schedule again at approval]** **[review]** At approval, write the exact formula here **including its rounding** (to the cent or the centicent, per order or per contract) and apply it to a 1-contract order, since each simulated trade is 1 contract. If fees round up to the whole cent per order, a 1-contract trade pays 2¢ at 50¢ instead of 1.75¢; the review's simulation puts that at about 0.45¢ of net edge.
+- **Taker fee [approval]:** for each simulated 1-contract trade at price q, f(q) = 0.07·q·(1 − q) rounded **up to the next $0.0001** (centicent), per Kalshi's fee schedule effective 2026-07-07 as read in stage 2's review (`analysis/REVIEW.md`, finding 5). T1 is also reported with the fee rounded up to the whole cent (about 0.45¢ of net edge worse), for reference only. **Makers (T2) pay no fee**, as on that schedule for series it doesn't list. **Before the first stage 3 snapshot**, the live schedule is checked for KXBTCD and KXETHD. If either rule differs, the difference is logged as a deviation before any data exists.
 - g = max(p_opt − ask − f(ask), (1 − p_opt) − (1 − bid) − f(1 − bid)).
 - **Trade:** for each market, the first row with g > τ = 0.01 buys 1 contract of the better side at the touch. One trade per market at most.
 - **Realised net P&L** r = payoff − price − f(price), payoff 1 or 0 from Kalshi's result.
@@ -69,7 +69,7 @@ t is the one-sided 95% Student t quantile with D − 1 degrees of freedom.
 - **PASS on T1** means a positive mean net P&L at 95% one-sided, with the unhedged figure agreeing in sign.
 - T2's power is not estimated (no fill model is assumed). Its gate is recorded, but its verdict is read as weaker than T1's.
 - **Only T1 can justify a next stage [review].** A T2 PASS alone is reported but does not justify the paper test, so the two gates don't double the chance of a false go-ahead. Splits by coin, hour or minutes to close are unadjusted, never gates.
-- **Expected power (from REVIEW.md, synthetic, not a promise) [review]:** T1 decides reliably only when the true net edge per contract is about 1¢ or more. In the review's harsher synthetic world (mispricing fading out at the tails, timing fixed) that takes a Kalshi mispricing of about 6¢ at a 1¢ half spread (net 1.7¢, T1 passes 99% at 28 days) and about 7 to 8¢ at a 2¢ half spread, not 4¢. There a 4¢ mispricing nets about 0¢ at a 1¢ half spread (KILL 96%), and 5¢ nets 0.8¢ (PASS 64%, KILL 13%, otherwise INCONCLUSIVE). The counts-only pilot's spread histogram is recorded next to this before approval; it changes no gate.
+- **Expected power (from REVIEW.md, synthetic, not a promise) [review]:** T1 decides reliably only when the true net edge per contract is about 1¢ or more. In the review's harsher synthetic world (mispricing fading out at the tails, timing fixed) that takes a Kalshi mispricing of about 6¢ at a 1¢ half spread (net 1.7¢, T1 passes 99% at 28 days) and about 7 to 8¢ at a 2¢ half spread, not 4¢. There a 4¢ mispricing nets about 0¢ at a 1¢ half spread (KILL 96%), and 5¢ nets 0.8¢ (PASS 64%, KILL 13%, otherwise INCONCLUSIVE). The counts-only pilot's spread histogram is recorded next to this before the start; it changes no gate.
 
 ## How outcomes will be read (fixed now)
 
@@ -104,4 +104,4 @@ t is the one-sided 95% Student t quantile with D − 1 degrees of freedom.
 
 ## Deviations log
 
-(empty until approval)
+(none yet)

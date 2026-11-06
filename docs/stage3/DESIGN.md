@@ -4,7 +4,7 @@ Written 2026-11-06, while stage 2 is still recording. **Nothing here used real s
 
 > **Red-team review (2026-11-06): the power figures below are superseded.** See [`REVIEW.md`](REVIEW.md). The constant-offset mispricing in `power_sim.py` creates near-riskless trades in the tails, and the fair value is closer to the truth than it can be at hourly horizons. With both corrected, the test decides reliably in 28 days at a mispricing of about 6¢ (1¢ half spread) or 7 to 8¢ (2¢), not 4¢. The structure of the test (outcome-scored, day clusters, hedge as a control variate) holds, with a fix to where the hedge starts.
 
-The pre-registration that follows from this is [`PREREGISTRATION_stage3_DRAFT.md`](PREREGISTRATION_stage3_DRAFT.md). **It is a draft. Mattias must approve it before anything starts.**
+The pre-registration that follows from this is [`PREREGISTRATION_stage3.md`](PREREGISTRATION_stage3.md). **Approved by Mattias on 2026-11-06 and frozen** (see its banner for how the approval was given). Frozen sha256: `a62576a867276b45bda07398f4fa804b44f275d054dfa653510814ee69c3c515`. If the file's sha256 differs from this, it was changed after the freeze, and the change must appear in its deviations log.
 
 ## In short
 
@@ -145,8 +145,10 @@ The stage 2 recorder, its workflow, `stage2-data` branch and analysis stay exact
 - Stage 2's recorder also stores the hourly KXBTCD markets in its market lists, since it pulls every open KXBTCD market. **Those must not be used for stage 3**, not even as a pilot: by the time anyone analyses them, stage 2's results will be known, and the BTC path is shared.
 - **The hedge idea is new to stage 3.** It could also be applied to stage 2's data as a reference figure. Doing that after stage 2's results are seen would be exploratory only and must be labelled so. It can't change any stage 2 verdict.
 
-## For Mattias to decide
+## Decisions (2026-11-06)
 
-1. **Approve the draft pre-registration** as written, or edit it. Main choices to check: 28 days, τ = 1¢, the 1¢ minimum edge behind KILL, hedged P&L as primary with the plain P&L required to agree in sign, and day clustering.
-2. **Start after stage 2 ends (recommended), or run in parallel** from approval.
-3. **Whether T2 (maker) should be a gate at all,** given its power is unknown. The draft keeps it as a secondary gate read as weaker evidence.
+1. **Pre-registration approved** (Mattias, 03:51 UTC, then automatic approval at 03:55 UTC while he was away). The red-team edits and the fee rounding were added under the automatic approval before the freeze.
+2. **Start after stage 2 ends**, the first slot at or after 2026-11-20 00:00 UTC, as the pre-registration says.
+3. **T2 (maker) stays a secondary gate.** Only T1 can justify a next stage (review edit).
+
+**Still to do before the start** (none of it changes a rule): write the stage 3 recorder and its workflow, run the 48-hour counts-only pilot, write and freeze `analyze_stage3.py` on synthetic fixtures, and re-check the fee schedule.
