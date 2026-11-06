@@ -39,6 +39,55 @@ def get(path, params=None, min_gap=0.22):
     return {"_error": "retries"}
 
 
+SETTLE_FIELDS = ("event_ticker", "status", "result", "close_time", "expiration_value", "floor_strike", "cap_strike", "strike_type")
+
+
+def settled(m):
+    return (m or {}).get("result") in ("yes", "no")
+
+
+def event_markets(path, ev, get_fn=None):
+    """All markets of one event from /markets or /historical/markets, following the cursor. (list, error or None)"""
+    get_fn = get_fn or get
+    out, cur = [], None
+    while True:
+        q = {"event_ticker": ev, "limit": 1000}
+        if cur:
+            q["cursor"] = cur
+        r = get_fn(path, q)
+        if "_error" in r:
+            return out, r["_error"]
+        out += r.get("markets", []) or []
+        cur = r.get("cursor")
+        if not cur or not r.get("markets"):
+            return out, None
+
+
+def settlements(events, get_fn=None):
+    """{ticker: fields} for every market of every event, plus a list of historical-endpoint errors.
+    Kalshi moves markets settled before a moving cutoff out of GET /markets into GET /historical/markets
+    (docs.kalshi.com, "Historical data"), so an event whose markets are missing or unsettled on the live endpoint
+    is looked up there too. Same logic as settlements() in the stage 3 pull. A live-endpoint error stops the pull;
+    a historical-endpoint error is recorded and those markets stay without a result (the analysis then treats the
+    event as unsettled, and it does not count)."""
+    markets, hist_errors = {}, []
+    for ev in sorted(events):
+        live, err = event_markets("/markets", ev, get_fn)
+        if err is not None:
+            sys.exit(f"stopping at {ev}: {err}")
+        for m in live:
+            markets[m["ticker"]] = {k: m.get(k) for k in SETTLE_FIELDS}
+        if live and all(settled(m) for m in live):
+            continue
+        hist, err = event_markets("/historical/markets", ev, get_fn)
+        if err is not None:
+            hist_errors.append(f"{ev}: {err}")
+        for m in hist:
+            if not settled(markets.get(m["ticker"])):
+                markets[m["ticker"]] = dict({k: m.get(k) for k in SETTLE_FIELDS}, source="historical")
+    return markets, hist_errors
+
+
 def seen_markets(dirs):
     """Event tickers and KXBTCD 5pm market tickers that ever had a two-sided quote in a snapshot."""
     events, tickers = set(), set()
@@ -80,25 +129,11 @@ def main():
     print(len(events), "events,", len(tickers), "KXBTCD 5pm markets with a two-sided quote", flush=True)
     os.makedirs(os.path.join(a.out, "trades"), exist_ok=True)
 
-    markets = {}
-    for ev in sorted(events):
-        cur = None
-        while True:
-            q = {"event_ticker": ev, "limit": 1000}
-            if cur:
-                q["cursor"] = cur
-            r = get("/markets", q)
-            if "_error" in r:
-                sys.exit(f"stopping at {ev}: {r['_error']}")
-            for m in r.get("markets", []):
-                markets[m["ticker"]] = {k: m.get(k) for k in ("event_ticker", "status", "result", "close_time", "expiration_value",
-                                                               "floor_strike", "cap_strike", "strike_type")}
-            cur = r.get("cursor")
-            if not cur or not r.get("markets"):
-                break
-    json.dump({"pulled_utc": dt.datetime.now(UTC).isoformat(), "markets": markets},
+    markets, hist_errors = settlements(events)
+    json.dump({"pulled_utc": dt.datetime.now(UTC).isoformat(), "markets": markets, "historical_errors": hist_errors},
               open(os.path.join(a.out, "settlements.json"), "w"), indent=1)
-    print("settlements", len(markets), flush=True)
+    print("settlements", len(markets), "of which from /historical/markets", sum(1 for m in markets.values() if m.get("source") == "historical"),
+          "; historical-endpoint errors", len(hist_errors), flush=True)
 
     for i, t in enumerate(sorted(tickers)):
         fn = os.path.join(a.out, "trades", t + ".json.gz")
