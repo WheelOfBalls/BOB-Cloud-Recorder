@@ -1,6 +1,7 @@
 # Tests for analyze_stage2.py on synthetic data only. No real recorded data or outcome is read.
 # Run: python3 -m unittest discover -s analysis/tests -v
 import os, sys, json, gzip, math, random, shutil, tempfile, unittest, contextlib, io
+from unittest import mock
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE)); sys.path.insert(0, HERE)
@@ -62,7 +63,7 @@ class FairValue(unittest.TestCase):
             if tau <= 0:
                 continue                                  # the exchange no longer lists an expired expiry
             d = A.dt.datetime.fromtimestamp(e, A.UTC).strftime("%d%b%y").upper().lstrip("0")
-            for K in range(int(F) - 8000, int(F) + 8001, 1000):
+            for K in range(int(F) - 8000, int(F) + 8001, 500):     # Deribit lists 500-wide strikes near the money
                 for cp in "CP":
                     px = MF.black(F, K, MF.true_w(math.log(K / F), tau), cp == "C") / F
                     if px > 2e-4:
@@ -88,6 +89,39 @@ class FairValue(unittest.TestCase):
             self.assertAlmostEqual(A.p_above(fits2, K, close, t2), MF.true_p(F, K, (close - t2) / A.YEAR_S), delta=2e-4)
         self.assertIsNone(A.p_above(fits2, 76000, e2 + 3600, t2))   # beyond the last expiry: no value
         self.assertIsNone(A.p_above(fits2, 76000, t2 - 1, t2))      # already closed
+
+    def test_p_opt_survives_exchange_ticks_and_spreads(self):
+        # Deribit quotes BTC options in ticks of 0.0001 BTC below 0.005 and 0.0005 above, with real spreads. Implied
+        # variance from in-the-money mids is then mostly tick noise (tiny vega), and fitting it put p_opt off by
+        # 2 to 5 cents. Out-of-the-money options alone keep it well under the 2.7c half spread + fee.
+        rng = random.Random(11)
+        tick = lambda p: 0.0001 if p < 0.005 else 0.0005
+        F = 76000.0; errs = []
+        for hhmm in ("02:00", "07:30", "15:00", "21:00"):
+            t = A.iso_ts(f"2026-11-06T{hhmm}:00Z"); close = A.iso_ts("2026-11-06T22:00:00Z")
+            opts = []
+            for e in (A.iso_ts(f"2026-11-0{d}T08:00:00Z") for d in (6, 7, 8)):
+                tau = (e - t) / A.YEAR_S
+                if tau <= 0:
+                    continue
+                dn = A.dt.datetime.fromtimestamp(e, A.UTC).strftime("%d%b%y").upper().lstrip("0")
+                for K in range(66000, 86001, 1000):
+                    for cp in "CP":
+                        px = MF.black(F, K, MF.true_w(math.log(K / F), tau), cp == "C") / F
+                        if px < 1e-4:
+                            continue
+                        sp, u, tk = max(tick(px), 0.0005 + 0.01 * px), rng.random(), tick(px)
+                        b, a = math.floor((px - u * sp) / tk) * tk, math.ceil((px + (1 - u) * sp) / tk) * tk
+                        if b > 0:
+                            opts.append({"instrument_name": f"BTC-{dn}-{K}-{cp}", "bid_price": b, "ask_price": a,
+                                         "mark_iv": 50, "underlying_price": F})
+            fits = A.fit_chain(opts, t)
+            tauT = (close - t) / A.YEAR_S; sd = math.sqrt(0.25 * tauT) * F
+            for z in (-1.5, -0.75, 0, 0.75, 1.5):
+                errs.append(abs(A.p_above(fits, F + z * sd, close, t) - MF.true_p(F, F + z * sd, tauT)))
+        errs.sort()
+        self.assertLess(errs[len(errs) // 2], 0.01)
+        self.assertLess(errs[-1], 0.03)
 
     def test_bracket_probability(self):
         F, t = 76000.0, A.iso_ts("2026-11-06T02:00:00Z")
@@ -246,10 +280,23 @@ class Guards(unittest.TestCase):
         rc, _ = run_cli(*self.args("--now", "2099-02-01T00:00:00+00:00"))
         self.assertIn("only allowed on synthetic", rc)
 
+    def test_refuses_moved_end_on_real_data(self):
+        open(self.end, "w").write("2026-11-05T00:00:00+00:00\n")
+        rc, _ = run_cli(*self.args())
+        self.assertIn("fixed at", rc)
+
+    def test_stray_marker_does_not_make_real_data_synthetic(self):
+        metas = [{"synthetic": False}]
+        for sub in ("local", "cloud"):
+            open(os.path.join(self.d, sub, "SYNTHETIC_FIXTURE"), "w").write("x")
+        self.assertFalse(A.is_synthetic([("local", f"{self.d}/local")], metas))
+        self.assertTrue(A.is_synthetic([("local", f"{self.d}/local")], [{"synthetic": True}]))
+
     def test_refuses_second_run(self):
         os.makedirs(f"{self.d}/out"); open(f"{self.d}/out/stage2_results.json", "w").write("{}")
         open(self.end, "w").write("2026-11-05T00:00:00+00:00\n")
-        rc, _ = run_cli(*self.args())
+        with mock.patch.object(A, "END_UTC", "2026-11-05T00:00:00+00:00"):
+            rc, _ = run_cli(*self.args())
         self.assertIn("runs once", rc)
 
     def test_coverage_mode_never_needs_outcomes(self):

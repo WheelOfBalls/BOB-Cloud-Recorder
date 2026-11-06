@@ -134,7 +134,7 @@ def make(root, start="2026-11-05T15:23:02+00:00", days=12.0, bias=0.0, seed=1, l
                 continue
             t = slot_t + jit
             gap_bad = src == "local" and local_invalid_every and i % local_invalid_every == 0
-            snap = {"utc": iso(t), "version": 1,
+            snap = {"utc": iso(t), "version": 1, "synthetic": True,
                     "index_before": {"t0": t, "t1": t + 0.2, "body": {"result": {"index_price": F}}},
                     "index_after": {"t0": t + 2, "t1": t + 2.2, "body": {"result": {"index_price": F * (1.0001)}}},
                     "deribit": {"t0": t + 0.3, "t1": t + 1.0, "options": opts},

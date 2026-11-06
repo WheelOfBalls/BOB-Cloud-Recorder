@@ -9,6 +9,7 @@ The one-shot analysis for the BOB crypto stage 2 test. The rules are in `../docs
 | `pull_after.py` | After recording ends, pulls settlement results and the public trade tape. It refuses to run before `stage2/end_utc.txt`. |
 | `analyze_stage2.py run` | S1, S2 and S3 on the merged series, plus the reference results. It refuses to run before the end time or while a qualifying event is still open, and it refuses to overwrite an earlier result. |
 | `tests/` | Unit and end-to-end tests on synthetic fixtures (`tests/make_fixture.py`). |
+| `REVIEW.md` | Adversarial review of the analysis before any data was analysed: ranked findings, what was fixed, and what needs a decision. Experiments in `review/`. |
 
 Stdlib only, Python 3.9 or later.
 
