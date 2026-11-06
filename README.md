@@ -37,3 +37,7 @@ python3 -I stage2/status.py
 ## Minutes
 
 Recording nonstop for 14 days uses about 20,000 runner minutes. That is free only while the repo is public. A private repo gets 2,000 free minutes a month.
+
+## Analysis
+
+`analysis/` holds the pre-registered stage 2 analysis (S1, S2, S3, with the deviation 4 merge of local and cloud snapshots), the script that pulls settlements and trades after recording ends, and tests on synthetic fixtures. `docs/` holds verbatim copies of the stage 1 and stage 2 pre-registrations and the stage 1 results. See `analysis/README.md` and, for every reading of the rules, `analysis/NOTES.md`. `analysis-tests.yml` runs the tests on pull requests that touch `analysis/`.

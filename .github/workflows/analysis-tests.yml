@@ -1,0 +1,28 @@
+# Tests for the stage 2 analysis, on synthetic fixtures only. Does not touch the recorder or the stage2-data branch.
+name: analysis-tests
+
+on:
+  pull_request:
+    paths: ["analysis/**", "docs/**", ".github/workflows/analysis-tests.yml"]
+  push:
+    branches: [main]
+    paths: ["analysis/**", ".github/workflows/analysis-tests.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        python: ["3.9", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Unit and end-to-end tests
+        run: python -m unittest discover -s analysis/tests -v
