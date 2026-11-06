@@ -32,3 +32,27 @@ python3 -m unittest discover -s analysis/tests -v
 ```
 
 The end-to-end tests build two 10-day synthetic fixtures, one with quotes centred on the true probability and one with a planted 6¢ bias, and take about two minutes.
+
+# Stage 3 analysis
+
+Pre-registered in `../docs/stage3/PREREGISTRATION_stage3.md` (frozen). Readings of open points: `NOTES_stage3.md`. Frozen hashes: `FROZEN_stage3.md`.
+
+| File | What it does |
+|---|---|
+| `analyze_stage3.py coverage` | Slots and validity per UTC day and the 80% day rule (288 slots, both coins). Counts only; safe during recording. |
+| `analyze_stage3.py preflight` | Fair-value and row pipeline on real snapshots (live or pilot), counts only. |
+| `pull_after_stage3.py` | After 2026-12-18 00:00 UTC: settlements and the trade tape for hourly markets. Refuses earlier. |
+| `analyze_stage3.py run` | T1 (hedged taker P&L) and T2 (maker), plus every pre-registered reported figure. Refuses before the end, on pilot data, or if a result exists. |
+| `tests/test_analyze_stage3.py` | Tests on synthetic 22-day worlds (`tests/make_fixture_stage3.py`): planted edge passes, null and wrong fair value kill, adverse maker fills kill T2, guards. About 2 to 3 minutes. |
+
+After the recording ends:
+
+```bash
+git fetch origin stage3-data && git worktree add ../stage3-data origin/stage3-data
+python3 -I analysis/analyze_stage3.py coverage --data ../stage3-data/data
+python3 -I analysis/pull_after_stage3.py --data ../stage3-data/data --out results3
+python3 -I analysis/analyze_stage3.py run --data ../stage3-data/data --settlements results3/settlements.json \
+    --trades results3/trades --out results3
+```
+
+Run `run` once, on the frozen commit, and commit its output straight away.
