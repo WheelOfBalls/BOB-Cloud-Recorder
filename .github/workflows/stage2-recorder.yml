@@ -1,9 +1,12 @@
 # Stage 2 cloud recorder. Public read-only Kalshi and Deribit data; no secrets, no accounts, no orders.
 # Each run loops for about 5h40m, taking one snapshot per 5-minute slot, and pushes every snapshot to the
-# stage2-data branch. The cron fires every 20 minutes so that a run is almost always queued behind the
-# active one; the concurrency group keeps exactly one running and at most one waiting. GitHub cron can be
-# late or skipped, so a dropped trigger costs nothing unless several in a row are lost. Actual timings are
-# in data/cloud_loop.csv and in each snapshot.
+# stage2-data branch. As soon as a run starts it queues its own successor (workflow_dispatch), which waits
+# in the concurrency group and starts when this run ends. GitHub's cron turned out to fire only a few times
+# a day here, so the chain carries the recording and the cron is only a backup that restarts a broken chain.
+# The concurrency group keeps exactly one run recording and at most one waiting (a newer waiting run
+# replaces an older one), so runs never overlap and no slot is taken twice. After stage2/end_utc.txt a run
+# exits at once and queues nothing, so the chain ends by itself. Actual timings are in data/cloud_loop.csv
+# and in each snapshot.
 name: stage2-recorder
 
 on:
@@ -17,6 +20,7 @@ on:
 
 permissions:
   contents: write
+  actions: write   # to queue the next run
 
 concurrency:
   group: stage2-recorder
@@ -43,6 +47,13 @@ jobs:
           else
             git worktree add -q --orphan -b stage2-data _data
           fi
+      - name: Queue the next run
+        if: env.over != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run stage2-recorder.yml --repo "$GITHUB_REPOSITORY" --ref "$GITHUB_REF_NAME" -f max_minutes=340 \
+            || echo "::warning::Could not queue the next run; the cron is the only backup now."
       - name: Record
         if: env.over != 'true'
         env:
