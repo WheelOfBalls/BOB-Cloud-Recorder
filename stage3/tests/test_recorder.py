@@ -172,8 +172,8 @@ class TestLoop(unittest.TestCase):
         ts = lambda *a: dt.datetime(*a, tzinfo=UTC).timestamp()
         self.assertEqual(cl.mode_at(ts(2026, 11, 6, 12), self.W), "pilot")
         self.assertEqual(cl.mode_at(ts(2026, 11, 8, 6), self.W), "off")
-        self.assertEqual(cl.mode_at(ts(2026, 11, 19, 23, 20), self.W), "off")
-        self.assertEqual(cl.mode_at(ts(2026, 11, 19, 23, 40), self.W), "live")    # may start 30 min early and wait
+        self.assertEqual(cl.mode_at(ts(2026, 11, 19, 18, 59), self.W), "off")
+        self.assertEqual(cl.mode_at(ts(2026, 11, 19, 19, 0), self.W), "live")     # may start 5 h early and wait
         self.assertEqual(cl.mode_at(ts(2026, 12, 17, 23, 59), self.W), "live")
         self.assertEqual(cl.mode_at(ts(2026, 12, 18), self.W), "off")
         self.assertEqual(cl.slot_range("live", self.W), (self.W["start"], self.W["end"]))

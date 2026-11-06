@@ -6,8 +6,8 @@
 #   pilot (until pilot_until_utc.txt)       -> records to stage3-pilot; counts-only report in report/ on that branch
 #   live  (start_utc.txt to end_utc.txt)    -> records to stage3-data, for the pre-registered test
 #   off   (otherwise)                       -> exits at once
-# Each run loops for about 5h40m. The cron fires every 20 minutes so a run is almost always queued behind the
-# active one; the concurrency group keeps one running and at most one waiting.
+# Each run loops for about 5h40m and queues its own successor; the cron (every 20 minutes, but GitHub fires it
+# far less often) restarts the chain if it breaks. The concurrency group keeps one running and at most one waiting.
 name: stage3-recorder
 
 on:
@@ -21,6 +21,7 @@ on:
 
 permissions:
   contents: write
+  actions: write      # to queue the next run (see "Queue the next run")
 
 concurrency:
   group: stage3-recorder
@@ -46,6 +47,15 @@ jobs:
           else
             git worktree add -q --orphan -b "$branch" _data
           fi
+      - name: Queue the next run
+        # GitHub's cron is unreliable on this repo (hours between firings), so each recording run queues its
+        # successor itself. It waits in the concurrency group and starts when this run ends. A run in mode
+        # "off" queues nothing, so the chain stops by itself after the pilot and after the live window.
+        # (A workflow_dispatch made with GITHUB_TOKEN is one of the events GitHub lets start a new run.)
+        if: env.mode != 'off'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run stage3-recorder.yml --repo "$GITHUB_REPOSITORY" --ref main -f max_minutes=340 || echo "could not queue the next run; cron will"
       - name: Record
         if: env.mode != 'off'
         env:

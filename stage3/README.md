@@ -13,10 +13,10 @@ Records what `docs/stage3/PREREGISTRATION_stage3.md` ("Recording") asks for. Sep
 
 ## Modes
 
-The workflow fires at `:06`, `:26`, `:46` and asks `cloud_loop.py --which` what to do:
+Each recording run queues the next one (GitHub's cron fires far less often than asked). The cron (`:06`, `:26`, `:46`) restarts the chain if it breaks. Each run asks `cloud_loop.py --which` what to do:
 
 - **pilot** (now before `pilot_until_utc.txt`): records to the `stage3-pilot` branch. At the end of every run the workflow writes `report/pilot_report.md` (and `.json`) on that branch and in the run's summary. **Pilot data is thrown away: it never enters the test.** It also holds the 5pm KXBTCD quotes recorded during stage 2, so nobody should open it beyond the counts report.
-- **live** (from 30 minutes before `start_utc.txt` to `end_utc.txt`): records to `stage3-data`. Slots before the start are skipped, so the first snapshot is at 2026-11-20 00:02:30 UTC.
+- **live** (from 5 hours before `start_utc.txt` to `end_utc.txt`): records to `stage3-data`. Slots before the start are skipped, so the first snapshot is at 2026-11-20 00:02:30 UTC.
 - **off** (otherwise): the run exits after a few seconds.
 
 During the live window only `counts_report.py` may be run on `stage3-data` (no spreads are printed there). Settlements and trades are pulled after the end, never during.
