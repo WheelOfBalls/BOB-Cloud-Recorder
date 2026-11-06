@@ -35,7 +35,9 @@ TAU = 0.01                                 # entry threshold
 KILL_EDGE = 0.01                           # T1 KILL if hedged upper bound < 1 cent
 H_CAP = {"BTC": 50.0, "ETH": 2.5}          # difference step cap; h = min(cap, 0.1 F sigma sqrt(tau))
 H_FRAC = 0.1
-SYNC_FRAC = 0.1                            # row dropped if |index_after - index_before| > 0.1 F sigma sqrt(tau)
+SYNC_FRAC = 0.1                            # row-sync flag: |index_after - index_before| > 0.1 F sigma sqrt(tau).
+                                           # Deviation 1: a reported split only, never a row filter (it reads the
+                                           # index after the Kalshi quote; docs/stage3/REVIEW_code.md finding 1)
 STALE_FRAC = 0.25                          # stale-quote split: index moved < 0.25 F sigma sqrt(tau) over 60 s before
 FEE_RATE = 0.07
 BOOT, SEED = 2000, 20261120
@@ -308,15 +310,15 @@ def snapshot_rows(s, i, coin):
             drop["no fair value"] += 1
             continue
         pa, F, sd, wk = fv
-        if abs(F_after - F_idx) > SYNC_FRAC * F * sd:
-            drop["row sync"] += 1
-            continue
+        sync_ok = abs(F_after - F_idx) <= SYNC_FRAC * F * sd   # deviation 1: flagged, not dropped
+        if not sync_ok:
+            drop["row-sync flag (kept; deviation 1)"] += 1
         p = pa if st == "greater" else 1 - pa
         book = (books.get(m["ticker"]) or {}).get("book")
         rows.append({"coin": coin, "event": ev, "ticker": m["ticker"], "K": K, "above": st == "greater", "close": close,
                      "slot": i, "t": slot_t(i), "t_q0": kd["t0"], "t_q": kd["t1"], "t_now": t_now, "mins": mins,
                      "bid": bid, "ask": ask, "mid": mid, "p": p, "F": F, "sd": sd, "wk": wk,
-                     "i_before": F_idx, "i_after": F_after, "t_after": ia["t1"], "t_before0": ib["t0"],
+                     "i_before": F_idx, "i_after": F_after, "sync_ok": sync_ok, "t_after": ia["t1"], "t_before0": ib["t0"],
                      "day": utc_day(close), "snap_day": utc_day(slot_t(i)),
                      "yes_depth_book": a2.book_depth(book, "yes", bid), "no_depth_book": a2.book_depth(book, "no", 1 - ask),
                      "yes_depth_top": num(m.get("yes_bid_size_fp")), "no_depth_top": num(m.get("yes_ask_size_fp"))})
@@ -620,6 +622,8 @@ def analyse(snaps, polls, results, tapes, start, end):
         ref[f"T1_minutes_{lab}"] = t1_block([dict(t) for t in trades if lo <= t["mins"] < hi])
     for tau in (0.0, 0.02):
         ref[f"T1_tau_{tau:.2f}"] = t1_block(taker_trades(rows, results, tau=tau)[0])
+    # deviation 1: the pre-registered row-sync rule, applied as a row filter, for reference only (biased; see REVIEW_code.md)
+    ref["T1_with_preregistered_row_sync_rule"] = t1_block(taker_trades([r for r in rows if r["sync_ok"]], results)[0])
     ref["T1_fee_rounded_up_to_cent"] = t1_block(taker_trades(rows, results, feefn=fee_cent)[0])
     ref["ex_ante_gap_on_traded_rows"] = cluster(trades, lambda x: x["g"])
     ref["T1_hedged_bootstrap_days"] = boot_days(trades, lambda x: x["hedged"], rng)

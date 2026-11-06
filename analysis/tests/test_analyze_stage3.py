@@ -132,6 +132,21 @@ class TestWorlds(unittest.TestCase):
         self.assertEqual(out["T2"]["verdict"], "KILL")
         self.assertLess(out["T2"]["est"], 0)
 
+    def test_row_sync_flags_but_keeps_rows(self):
+        """Deviation 1: a move between index_before and index_after (read after the quote) flags rows, never drops them."""
+        import copy
+        w, snaps, polls, results, tapes, _ = world("null")
+        i = next(k for k, s in snaps.items() if a3.coin_valid(s, "BTC") and a3.snapshot_rows(s, k, "BTC")[0])
+        base, _, _ = a3.snapshot_rows(snaps[i], i, "BTC")
+        s2 = copy.deepcopy(snaps[i])
+        s2["coins"]["BTC"]["index_after"]["body"]["result"]["index_price"] *= 1.0009   # inside the 0.10% validity rule
+        self.assertTrue(a3.coin_valid(s2, "BTC"))
+        moved, drop, _ = a3.snapshot_rows(s2, i, "BTC")
+        self.assertEqual([r["ticker"] for r in moved], [r["ticker"] for r in base])
+        self.assertTrue(all(r["sync_ok"] for r in base))
+        self.assertFalse(any(r["sync_ok"] for r in moved))
+        self.assertEqual(drop["row-sync flag (kept; deviation 1)"], len(moved))
+
     def test_rows_respect_filters(self):
         w, snaps, polls, results, tapes, (out, rows, trades, fills) = world("edge")
         self.assertTrue(rows)
@@ -142,7 +157,7 @@ class TestWorlds(unittest.TestCase):
         self.assertEqual(len({t["ticker"] for t in trades}), len(trades))   # one trade per market
         for k in ("T1_coin_BTC", "T1_coin_ETH", "T1_minutes_2-15", "T1_tau_0.00", "T1_tau_0.02", "T1_fee_rounded_up_to_cent",
                   "T1_hedged_bootstrap_days", "T1_hedged_bootstrap_7day_blocks", "T1_stale_split_quiet", "T1_hedge_5min_snapshots",
-                  "calibration_last_row_ge_5min"):
+                  "calibration_last_row_ge_5min", "T1_with_preregistered_row_sync_rule"):
             self.assertIn(k, out["reference"])
         self.assertEqual(out["reference"]["T1_hedged_bootstrap_7day_blocks"]["units"], 4)
         # whole-cent fee makes T1 worse, never better

@@ -104,4 +104,14 @@ t is the one-sided 95% Student t quantile with D − 1 degrees of freedom.
 
 ## Deviations log
 
-(none yet)
+### Deviation 1 (2026-11-06, before any live stage 3 data): the row-sync rule no longer selects rows
+
+**Approval.** Approved at about 06:51 UTC on 2026-11-06 by the project's coordinator (a Claude session), acting under Mattias's delegation ("remember, im stepping away so automatically continue, reprompt and approve", 03:55 UTC). Mattias has not seen it yet. **He can revert it at any time before 2026-11-20 00:00 UTC**; after that it stands, because live data will exist.
+
+**Data seen.** None. The live window starts on 2026-11-20. The finding came from code review and from synthetic simulations only. No pilot or stage 2 quote, index level, p_opt, trade or outcome was opened.
+
+**Change.** The rule under "Row sync [review]" (drop a row if |`index_after` − `index_before`| > 0.1 × F σ√τ) **no longer removes rows** from T1 or T2. Each row is flagged instead. T1 recomputed with the original rule applied is reported under "Reported, never used to rescue a verdict", as "T1 with the pre-registered row-sync rule". Nothing else changes: the gates, the 5 s and 0.10% validity rules, the hedge start at `index_after`, p_opt's inputs, the stale-quote split and the 28-day window all stay as written above.
+
+**Why.** `index_after` is read after the Kalshi quote, and the hedged P&L is measured from it. A spot move between `index_before` and the quote triggers trades against that move. Requiring |`index_after` − `index_before`| to be small then keeps mostly the trades whose next move (quote to `index_after`) reversed it, which is the direction the trade bet on. So the rule selects on information a taker could not have had. In a zero-edge synthetic world (Kalshi quoting the true probability at the quote instant), it raised the expected hedged P&L by +1.0 to +2.1¢ per contract in an exact-expectation simulation, and by +1.76¢ on average over 6 seeds of the frozen analysis code. In one seed both PASS conditions held on the mean. That bias is as large as the 1¢ KILL margin. Details and scripts: `docs/stage3/REVIEW_code.md` (finding 1) and `docs/stage3/review_code/`. The purpose the rule was added for, which is not trusting quotes taken while the index moved, is still served without look-ahead by the 5 s validity rule, by starting the hedge after the quote, and by the stale-quote split.
+
+**Code.** `analysis/analyze_stage3.py` (new sha256 in `analysis/FROZEN_stage3.md`), with a test that a moved `index_after` flags rows and does not drop them. The zero-edge check was re-run after the change (results in `REVIEW_code.md`).
