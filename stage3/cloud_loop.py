@@ -6,7 +6,7 @@
 #     push never delays it. The poll at hh:00:00 is the index at the hourly close.
 # Windows (all UTC, files next to this script):
 #   pilot : now < pilot_until_utc.txt          -> branch stage3-pilot (thrown away, never enters a test)
-#   live  : start_utc.txt <= slot < end_utc.txt -> branch stage3-data  (runs may begin up to 30 min early and wait)
+#   live  : start_utc.txt <= slot < end_utc.txt -> branch stage3-data  (runs may begin up to 5 h early and wait)
 #   off   : otherwise                           -> the workflow exits at once
 # Every attempt is logged to <data>/cloud_loop.csv with its target and actual start. Nothing is filled in.
 import os, sys, time, argparse, threading, subprocess, datetime as dt
@@ -17,7 +17,7 @@ import record_snapshot as rs  # noqa: E402
 
 STEP, PHASE = 300, 150          # 5-minute slots at hh:m2:30
 RUN_LIMIT = 200                 # the snapshot's own watchdog fires at 170 s
-LEAD_S = 1800                   # a live run may start this long before the first slot
+LEAD_S = 5 * 3600               # a live run may start this long before the first slot and wait (cron can be hours late)
 UTC = dt.timezone.utc
 BRANCH = {"pilot": "stage3-pilot", "live": "stage3-data"}
 
