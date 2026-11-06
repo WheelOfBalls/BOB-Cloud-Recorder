@@ -4,10 +4,13 @@
 #
 # stage3/cloud_loop.py --which decides what a run does, from the dates in stage3/:
 #   pilot (until pilot_until_utc.txt)       -> records to stage3-pilot; counts-only report in report/ on that branch
+#   wait  (pilot end to 5 h before start)   -> records nothing; sleeps up to 5h40m so the run chain reaches the live window
 #   live  (start_utc.txt to end_utc.txt)    -> records to stage3-data, for the pre-registered test
-#   off   (otherwise)                       -> exits at once
-# Each run loops for about 5h40m and queues its own successor; the cron (every 20 minutes, but GitHub fires it
-# far less often) restarts the chain if it breaks. The concurrency group keeps one running and at most one waiting.
+#   off   (after end_utc.txt)               -> exits at once and queues nothing, which ends the chain
+# Each run loops for about 5h40m and queues its own successor (at its start, and again at its end in case the first
+# one was lost); the cron (every 20 minutes, but GitHub fires it far less often) restarts the chain if it breaks.
+# The concurrency group keeps one running and at most one waiting. To stop the chain by hand, disable the workflow
+# (cancelling the running run alone leaves its queued successor).
 name: stage3-recorder
 
 on:
@@ -38,7 +41,7 @@ jobs:
           read mode branch < <(python3 -I stage3/cloud_loop.py --which)
           echo "mode=$mode" >> "$GITHUB_ENV"; echo "branch=$branch" >> "$GITHUB_ENV"
           echo "Mode: $mode, branch: ${branch:-none}"
-          [ "$mode" = off ] && exit 0
+          if [ "$mode" = off ] || [ "$mode" = wait ]; then exit 0; fi
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if git ls-remote --exit-code --heads origin "$branch" >/dev/null; then
@@ -50,14 +53,24 @@ jobs:
       - name: Queue the next run
         # GitHub's cron is unreliable on this repo (hours between firings), so each recording run queues its
         # successor itself. It waits in the concurrency group and starts when this run ends. A run in mode
-        # "off" queues nothing, so the chain stops by itself after the pilot and after the live window.
+        # "off" queues nothing, so the chain stops by itself after the live window. Between the pilot and the live
+        # window the runs are "wait" runs, which record nothing (before this, the chain stopped at the pilot's end
+        # and the live start depended on a cron firing in the 5 hours before 2026-11-20 00:00 UTC).
         # (A workflow_dispatch made with GITHUB_TOKEN is one of the events GitHub lets start a new run.)
         if: env.mode != 'off'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh workflow run stage3-recorder.yml --repo "$GITHUB_REPOSITORY" --ref main -f max_minutes=340 || echo "could not queue the next run; cron will"
+        run: |
+          for w in 0 5 15 45; do
+            sleep $w
+            gh workflow run stage3-recorder.yml --repo "$GITHUB_REPOSITORY" --ref main -f max_minutes=340 && exit 0
+          done
+          echo "::warning::could not queue the next run; the end-of-run step or cron will"
+      - name: Wait (between the pilot and the live window; records nothing)
+        if: env.mode == 'wait'
+        run: python3 -I stage3/cloud_loop.py --mode wait --max-minutes "${{ inputs.max_minutes || '340' }}"
       - name: Record
-        if: env.mode != 'off'
+        if: env.mode == 'pilot' || env.mode == 'live'
         env:
           BOB_CRON: ${{ github.event.schedule }}
         run: python3 -I stage3/cloud_loop.py --mode "$mode" --data _data --max-minutes "${{ inputs.max_minutes || '340' }}"
@@ -68,3 +81,15 @@ jobs:
           cat _data/report/pilot_report.md >> "$GITHUB_STEP_SUMMARY"
           cd _data && git add -A && { git diff --cached --quiet || git commit -q -m "stage3 pilot counts report"; }
           for w in 0 2 4 8; do sleep $w; git push -q origin "HEAD:$branch" && break; git pull -q --rebase origin "$branch"; done
+      - name: Queue the next run again (in case the first one was lost)
+        # A newer queued run replaces an older one in the concurrency group, so this never adds a second recorder.
+        # Not on cancellation, so cancelling a run (with the workflow disabled) is not undone here.
+        if: "!cancelled() && env.mode != 'off'"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for w in 0 5 15 45; do
+            sleep $w
+            gh workflow run stage3-recorder.yml --repo "$GITHUB_REPOSITORY" --ref main -f max_minutes=340 && exit 0
+          done
+          echo "::warning::could not queue the next run; cron will"

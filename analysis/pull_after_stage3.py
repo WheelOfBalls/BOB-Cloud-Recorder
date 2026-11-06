@@ -38,6 +38,53 @@ def seen(data):
     return events, tickers, modes
 
 
+SETTLE_FIELDS = ("event_ticker", "status", "result", "close_time", "expiration_value", "floor_strike", "cap_strike", "strike_type")
+
+
+def settled(m):
+    return (m or {}).get("result") in ("yes", "no")
+
+
+def event_markets(path, ev, get=None):
+    """All markets of one event from /markets or /historical/markets, following the cursor. (list, error or None)"""
+    get = get or pa.get
+    out, cur = [], None
+    while True:
+        q = {"event_ticker": ev, "limit": 1000}
+        if cur:
+            q["cursor"] = cur
+        r = get(path, q)
+        if "_error" in r:
+            return out, r["_error"]
+        out += r.get("markets", []) or []
+        cur = r.get("cursor")
+        if not cur or not r.get("markets"):
+            return out, None
+
+
+def settlements(events, get=None):
+    """{ticker: fields} for every market of every event. Kalshi moves markets settled before a moving cutoff out of
+    GET /markets into GET /historical/markets (docs.kalshi.com, "Historical data"), so an event whose markets are
+    missing or unsettled on the live endpoint is looked up there too. A live-endpoint error stops the pull; a
+    historical-endpoint error is recorded and the markets stay without a result (the analysis counts them)."""
+    markets, hist_errors = {}, []
+    for ev in sorted(events):
+        live, err = event_markets("/markets", ev, get)
+        if err is not None:
+            sys.exit(f"stopping at {ev}: {err}")
+        for m in live:
+            markets[m["ticker"]] = {k: m.get(k) for k in SETTLE_FIELDS}
+        if live and all(settled(m) for m in live):
+            continue
+        hist, err = event_markets("/historical/markets", ev, get)
+        if err is not None:
+            hist_errors.append(f"{ev}: {err}")
+        for m in hist:
+            if not settled(markets.get(m["ticker"])):
+                markets[m["ticker"]] = dict({k: m.get(k) for k in SETTLE_FIELDS}, source="historical")
+    return markets, hist_errors
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--data", required=True); ap.add_argument("--out", required=True)
@@ -50,25 +97,13 @@ def main():
         raise SystemExit(f"refusing: expected live snapshots only, found {sorted(map(str, modes))}")
     print(len(events), "hourly events,", len(tickers), "markets with a two-sided quote in the last hour", flush=True)
     os.makedirs(os.path.join(a.out, "trades"), exist_ok=True)
-    markets = {}
-    for ev in sorted(events):
-        cur = None
-        while True:
-            q = {"event_ticker": ev, "limit": 1000}
-            if cur:
-                q["cursor"] = cur
-            r = pa.get("/markets", q)
-            if "_error" in r:
-                sys.exit(f"stopping at {ev}: {r['_error']}")
-            for m in r.get("markets", []):
-                markets[m["ticker"]] = {k: m.get(k) for k in ("event_ticker", "status", "result", "close_time", "expiration_value",
-                                                               "floor_strike", "cap_strike", "strike_type")}
-            cur = r.get("cursor")
-            if not cur or not r.get("markets"):
-                break
+    markets, hist_errors = settlements(events)
+    missing = sorted(t for t in tickers if (markets.get(t) or {}).get("result") not in ("yes", "no"))
     with open(os.path.join(a.out, "settlements.json"), "w") as f:
-        json.dump({"pulled_utc": dt.datetime.now(UTC).isoformat(), "markets": markets}, f, indent=1)
-    print("settlements", len(markets), flush=True)
+        json.dump({"pulled_utc": dt.datetime.now(UTC).isoformat(), "markets": markets,
+                   "quoted_markets_without_result": missing, "historical_errors": hist_errors}, f, indent=1)
+    print("settlements", len(markets), "; quoted markets without a yes/no result", len(missing),
+          "; historical endpoint errors", len(hist_errors), flush=True)
     for i, t in enumerate(sorted(tickers)):
         fn = os.path.join(a.out, "trades", t + ".json.gz")
         if os.path.exists(fn):

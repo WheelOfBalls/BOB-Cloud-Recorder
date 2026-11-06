@@ -6,8 +6,10 @@
 #     push never delays it. The poll at hh:00:00 is the index at the hourly close.
 # Windows (all UTC, files next to this script):
 #   pilot : now < pilot_until_utc.txt          -> branch stage3-pilot (thrown away, never enters a test)
+#   wait  : pilot end <= now < live start - 5 h -> no data, no branch: the run sleeps and queues its successor, so the
+#           run chain survives the 12 days between the pilot and the live window without relying on GitHub's cron
 #   live  : start_utc.txt <= slot < end_utc.txt -> branch stage3-data  (runs may begin up to 5 h early and wait)
-#   off   : otherwise                           -> the workflow exits at once
+#   off   : otherwise (after the live window)   -> the workflow exits at once and queues nothing
 # Every attempt is logged to <data>/cloud_loop.csv with its target and actual start. Nothing is filled in.
 import os, sys, time, argparse, threading, subprocess, datetime as dt
 
@@ -41,7 +43,14 @@ def mode_at(t, w):
         return "pilot"
     if w["start"] - LEAD_S <= t < w["end"]:
         return "live"
+    if t < w["start"] - LEAD_S:
+        return "wait"
     return "off"
+
+
+def wait_until(t, w, max_minutes):
+    """A wait run sleeps until a minute after the live lead begins, or until its own time limit."""
+    return min(w["start"] - LEAD_S + 60, t + max_minutes * 60)
 
 
 def slot_range(mode, w):
@@ -134,7 +143,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--which", action="store_true", help="print the current mode and its branch, then exit")
     ap.add_argument("--data", help="checkout of the data branch; files go to <data>/data")
-    ap.add_argument("--mode", choices=["pilot", "live", "test"], help="test: a short run with no window and no push")
+    ap.add_argument("--mode", choices=["pilot", "live", "test", "wait"],
+                    help="test: a short run with no window and no push; wait: sleep (no data) so the next run can be queued")
     ap.add_argument("--max-minutes", type=float, default=340)
     ap.add_argument("--no-push", action="store_true")
     a = ap.parse_args()
@@ -142,6 +152,11 @@ def main():
     if a.which:
         m = mode_at(time.time(), w)
         print(m, BRANCH.get(m, ""))
+        return 0
+    if a.mode == "wait":
+        until = wait_until(time.time(), w, a.max_minutes)
+        print(f"waiting until {iso(until)} (live lead starts {iso(w['start'] - LEAD_S)})", flush=True)
+        time.sleep(max(0.0, until - time.time()))
         return 0
     repo = os.path.abspath(a.data)
     data = os.path.join(repo, "data")
