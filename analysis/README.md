@@ -5,6 +5,7 @@ The one-shot analysis for the BOB crypto stage 2 test. The rules are in `../docs
 | File | What it does |
 |---|---|
 | `analyze_stage2.py coverage` | Slot validity, the deviation 4 merge of local and cloud snapshots, and the 80% coverage of each event. It reads no outcomes, so it is safe to run while recording continues. |
+| `analyze_stage2.py preflight` | Runs the fair-value and row pipeline on real snapshots and prints counts only (fitted expiries, rows, dropped rows, books), to catch format problems before the real run. Prints no prices, gaps or outcomes. |
 | `pull_after.py` | After recording ends, pulls settlement results and the public trade tape. It refuses to run before `stage2/end_utc.txt`. |
 | `analyze_stage2.py run` | S1, S2 and S3 on the merged series, plus the reference results. It refuses to run before the end time or while a qualifying event is still open, and it refuses to overwrite an earlier result. |
 | `tests/` | Unit and end-to-end tests on synthetic fixtures (`tests/make_fixture.py`). |

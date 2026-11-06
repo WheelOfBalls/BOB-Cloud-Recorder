@@ -256,6 +256,11 @@ class Guards(unittest.TestCase):
         rc, out = run_cli("coverage", "--local", f"{self.d}/local", "--cloud", f"{self.d}/cloud", "--end", self.end)
         self.assertEqual(rc, 0); self.assertIn("coverage, merged", out)
 
+    def test_preflight_prints_counts_only(self):
+        rc, out = run_cli("preflight", "--local", f"{self.d}/local", "--cloud", f"{self.d}/cloud", "--end", self.end)
+        self.assertEqual(rc, 0); self.assertIn("preflight (counts only)", out)
+        self.assertNotIn("S1", out); self.assertNotIn("p_opt", out)
+
 
 class EndToEnd(unittest.TestCase):
     """Full fixtures: 10.4 days, an 8 h local outage the cloud covers, and every 7th local snapshot invalid."""
