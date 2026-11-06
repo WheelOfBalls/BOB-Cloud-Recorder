@@ -1,0 +1,51 @@
+# Stage 3 recorder checks on pull requests: unit tests on synthetic data, then one real test-mode snapshot and two
+# minutes of index polls on a GitHub runner, summarised as counts only. Nothing is pushed; the files are kept as a
+# run artifact for 3 days. Does not touch stage 2 or any data branch.
+name: stage3-check
+
+on:
+  pull_request:
+    paths: ["stage3/**", ".github/workflows/stage3-*.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -W error::ResourceWarning -m unittest discover -s stage3/tests -v
+  live-snapshot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: One snapshot and two minutes of index polls (nothing pushed)
+        run: python3 -I stage3/cloud_loop.py --mode test --data "$RUNNER_TEMP/check"
+      - name: Counts-only summary
+        run: |
+          python3 -I stage3/counts_report.py --data "$RUNNER_TEMP/check/data" --no-spreads --json "$RUNNER_TEMP/check/report.json"
+          python3 -I - <<'EOF'
+          import json, os, sys
+          d = os.path.join(os.environ["RUNNER_TEMP"], "check")
+          r = json.load(open(os.path.join(d, "report.json")))
+          for f in ("crash_log.txt", "hang_log.txt"):
+              p = os.path.join(d, "data", f)
+              if os.path.exists(p) and open(p).read().strip(): sys.exit(f"{f}: " + open(p).read()[:500])
+          bad = []
+          if r["snapshots"] != 1: bad.append("expected one snapshot")
+          if r.get("errors"): bad.append(f"request errors {r['errors']}")
+          for c in ("BTC", "ETH"):
+              if not r.get(f"index_{c}", {}).get("ok"): bad.append(f"no 1-minute {c} index poll")
+              if r.get(f"events_{c}", {}).get("hourly", 0) < 1: bad.append(f"no open hourly {c} event")
+          sys.exit("FAILED: " + "; ".join(bad) if bad else 0)
+          EOF
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stage3-check
+          path: ${{ runner.temp }}/check
+          retention-days: 3
