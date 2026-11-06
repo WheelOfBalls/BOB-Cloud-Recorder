@@ -11,6 +11,7 @@ import os, sys, json, gzip, glob, time, argparse, datetime as dt, urllib.request
 K = "https://api.elections.kalshi.com/trade-api/v2"
 UTC = dt.timezone.utc
 _last = [0.0]
+END_UTC = "2026-11-19T15:25:00+00:00"   # stage2/end_utc.txt; --end cannot move it
 
 
 def get(path, params=None, min_gap=0.22):
@@ -70,6 +71,8 @@ def main():
     ap.add_argument("--end", default=os.path.join(here, "..", "stage2", "end_utc.txt"))
     a = ap.parse_args()
     end = dt.datetime.fromisoformat(open(a.end).read().strip())
+    if end != dt.datetime.fromisoformat(END_UTC):
+        raise SystemExit(f"refusing: {a.end} gives {end.isoformat()}, but the recording end is fixed at {END_UTC}")
     if dt.datetime.now(UTC) < end:
         raise SystemExit(f"refusing: recording ends {end.isoformat()}; outcomes are pulled only after that")
     dirs = [d for d in (a.local, a.cloud) if d]

@@ -14,7 +14,7 @@ Items marked **(material)** could plausibly move a result.
 
 ## Fair value
 
-6. **(material) Fit inputs.** The fit uses every Deribit option, calls and puts, in-the-money included, that has `bid_price > 0`, `ask_price ≥ bid_price` and a non-missing `mark_iv`. The fit is ordinary least squares on total variance w, with no weights. Alternatives: out-of-the-money options only (the usual choice, since in-the-money mids are noisier), or a vega or spread weighting.
+6. **(material) Fit inputs.** The fit uses out-of-the-money Deribit options only (calls with K ≥ F, puts with K < F, F being that option's own `underlying_price`) that have `bid_price > 0`, `ask_price ≥ bid_price` and a non-missing `mark_iv`. The fit is ordinary least squares on total variance w, with no weights. *Changed in review, before any data was analysed (see `REVIEW.md`, finding 1):* the first version also used in-the-money options. With Deribit's real tick sizes (0.0001 BTC below 0.005, 0.0005 above) and spreads, an in-the-money mid is mostly tick noise once intrinsic value is taken out, and the unweighted fit then put p_opt off by a median 2 to 5 cents on synthetic chains, about the size of the half spread plus fee that S1 measures. Out-of-the-money only brings that to about 0.3 to 0.5 cents (test `test_p_opt_survives_exchange_ticks_and_spreads`). The pre-registration says only "two-sided option mids", so this stays within its wording. Alternatives not taken: a vega or spread weighting.
 7. **Price units.** Deribit quotes BTC options in BTC, which is the Black-76 USD price divided by `underlying_price`. Implied w is inverted on that normalised price. The recorded snapshot's `mark_price` and `mark_iv` reproduce under this convention to 3e-4 BTC (a unit test checks it).
 8. **Forward.** Each option's k uses its own `underlying_price`. The expiry's forward F is the median `underlying_price` across that expiry's options.
 9. **Interpolation "at fixed k".** The forward at the Kalshi close is interpolated linearly in calendar time between the two expiries. k = ln(K / F_T) is then held fixed while w is interpolated. Before the first expiry, F is that expiry's forward and w is scaled by τ_T / τ_1.
@@ -25,7 +25,7 @@ Items marked **(material)** could plausibly move a result.
 
 ## Tests
 
-14. **The fee** is used as written, 0.07·q·(1 − q), with no rounding. **(material)** Kalshi rounds fees up to the next cent per order, which on one contract near 50¢ turns 1.75¢ into 2¢. S1 is also reported with the fee rounded up, for reference only.
+14. **The fee** is used as written, 0.07·q·(1 − q), with no rounding. Kalshi's fee schedule (effective 2026-07-07) rounds so that fee plus cost lands on a centicent ($0.0001), so rounding barely matters. S1 is also reported with the fee rounded up to a whole cent, which is a conservative upper bound, for reference only. The same schedule charges makers nothing on series it does not list, and KXBTCD is not listed, which matches "makers pay no fee". Check the schedule again before the run.
 15. **The S2 side** is whichever of the two gaps is larger, with ties going to YES. The P&L includes the taker fee on entry and nothing at settlement.
 16. **S3 price and depth.** The resting price is the best bid from the market list, the same pull that is synchronised with Deribit. The NO bid is 1 − `yes_ask`. **(material)** Depth is the larger of (a) the contracts at that exact price in the recorded order book and (b) the top-of-book size from the market list (`yes_bid_size_fp` for YES, `yes_ask_size_fp` for NO). The book is pulled a few seconds after the list, so the two can disagree. Taking the larger is the stricter choice, which fits "this assumes nobody ahead cancels, so it is strict". Alternative: use the book only.
 17. **(material) S3 order life.** An order rests from the end of that snapshot's Kalshi market-list request until the start of the next recorded snapshot's request (valid or not), and never longer than 300 s. Trades count if they fall in (start, end].
@@ -49,8 +49,9 @@ Items marked **(material)** could plausibly move a result.
 
 ## Guard rails in the code
 
-- `run` refuses to run on real data before `stage2/end_utc.txt`, refuses while any qualifying event is still open, and refuses if `stage2_results.json` already exists in the output folder. `--now` works only on folders marked `SYNTHETIC_FIXTURE`.
-- `pull_after.py` refuses to pull outcomes or trades before the end time.
+- `run` refuses to run on real data before the end time, refuses while any qualifying event is still open, and refuses if `stage2_results.json` already exists in the output folder. On real data `--end` must say 2026-11-19 15:25 UTC (hard-coded), so it can't be moved earlier. `--now` works only on synthetic fixtures: every folder must hold a `SYNTHETIC_FIXTURE` marker *and* every snapshot must carry `"synthetic": true`, which real recorder snapshots never do.
+- `pull_after.py` refuses to pull outcomes or trades before the end time, and refuses an `--end` file that moves it.
+- These guards stop accidents, not a determined person: a second `--out` folder still allows a second run. The record that counts is the script's sha256 in the result file, matched against the frozen version in `REVIEW.md`.
 - `coverage` reads snapshots only, never outcomes, and can be run at any time.
 
 ## Things a reviewer should check that are not readings

@@ -34,6 +34,7 @@ DERIBIT_EXPIRY_HOUR = 8         # Deribit BTC options expire 08:00 UTC
 NEED_SLOTS = int(NEED_FRAC * WINDOW_H * 12 + 0.999)   # 288, as in status.py
 FIVE_PM = "17"                  # 5pm ET events: event ticker ends in 17
 TOL = 1e-6
+END_UTC = "2026-11-19T15:25:00+00:00"   # stage2/end_utc.txt; on real data --end must match it
 
 
 def fee(q):
@@ -146,6 +147,8 @@ def fit_chain(options, t_now):
             e, K, call = parse_instrument(o["instrument_name"])
         except (ValueError, KeyError):
             continue
+        if (K >= F) != call:              # out-of-the-money only: calls at K >= F, puts at K < F (NOTES.md item 6)
+            continue
         by_exp[e].append((K, call, F, 0.5 * (bid + ask)))
     fits = []
     for e, rows in by_exp.items():
@@ -224,6 +227,7 @@ def snapshot_meta(s, path, src):
         if ev.endswith(FIVE_PM) and m.get("close_time"):
             events[ev] = iso_ts(m["close_time"])
     return {"path": path, "src": src, "t": t, "valid": valid, "gap": gap, "move": move, "events": events,
+            "synthetic": s.get("synthetic") is True,
             "kd_t0": kd.get("t0"), "kd_t1": kd.get("t1"), "chain_t1": ch.get("t1"),
             "declared": ((s.get("source") or {}).get("host"))}
 
@@ -492,8 +496,11 @@ def brier_logloss(rows, results, rng):
 # =====================================================================================================
 # Driver
 # =====================================================================================================
-def is_synthetic(dirs):
-    return all(os.path.exists(os.path.join(d, "SYNTHETIC_FIXTURE")) for _, d in dirs if d)
+def is_synthetic(dirs, metas=None):
+    """Synthetic only if every folder has a SYNTHETIC_FIXTURE marker and every snapshot says so itself.
+    Real recorder snapshots never carry "synthetic", so a stray marker file cannot unlock the test guards."""
+    marked = all(os.path.exists(os.path.join(d, "SYNTHETIC_FIXTURE")) for _, d in dirs if d)
+    return marked and (metas is None or (bool(metas) and all(m.get("synthetic") for m in metas)))
 
 
 def read_end(path):
@@ -645,17 +652,16 @@ def main(argv=None):
     dirs = [("local", a.local), ("cloud", a.cloud)]
     if not a.local and not a.cloud:
         ap.error("give --local and/or --cloud")
-    synthetic = is_synthetic(dirs)
+    metas, unreadable = load_meta(dirs)
+    if not metas:
+        raise SystemExit("no readable snapshots")
+    synthetic = is_synthetic(dirs, metas)
     now = dt.datetime.now(UTC).timestamp()
     if a.now:
         if not synthetic:
             raise SystemExit("--now is only allowed on synthetic fixtures")
         now = dt.datetime.fromisoformat(a.now).timestamp()
     end = read_end(a.end)
-
-    metas, unreadable = load_meta(dirs)
-    if not metas:
-        raise SystemExit("no readable snapshots")
     grid = Grid(metas)
     lines = [f"stage 2 analysis  {'SYNTHETIC FIXTURE' if synthetic else 'REAL DATA'}  now {fmt(now)}Z  end {fmt(end)}Z",
              f"snapshots: {collections.Counter(m['src'] for m in metas)}; unreadable {len(unreadable)}; slot phase {grid.phase:.1f}s"]
@@ -678,6 +684,8 @@ def main(argv=None):
     # ---------------- run: the one-shot test ----------------
     if not (a.settlements and a.trades and a.out):
         ap.error("run needs --settlements, --trades and --out")
+    if not synthetic and end != dt.datetime.fromisoformat(END_UTC).timestamp():
+        raise SystemExit(f"refusing: --end gives {fmt(end)}Z, but on real data the end is fixed at {END_UTC}")
     if not synthetic and now < end:
         raise SystemExit(f"refusing: recording ends {fmt(end)}Z; the test may not run before then")
     res_path = os.path.join(a.out, "stage2_results.json")
