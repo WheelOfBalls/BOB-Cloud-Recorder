@@ -22,16 +22,20 @@ GitHub's scheduled runs can start late or be skipped. Nothing is filled in after
 
 ## Check coverage
 
+`stage2/status.py` reports coverage on the merged series that deviation 4 in `PREREGISTRATION.md` fixes: for each 5-minute slot, the local snapshot if it is valid, otherwise the first valid cloud snapshot in that slot. That merged series is what the 80% rule uses. Local-only and cloud-only coverage are printed next to it for reference only.
+
 ```bash
-git fetch origin stage2-data
-git worktree add ../stage2-data origin/stage2-data
-cp -r ../stage2-data/data stage2/data
-python3 -I stage2/status.py
+python3 -I stage2/status.py --fetch-cloud              # clone or update stage2-data into stage2/cloud_data/, then merge with stage2/data/
+python3 -I stage2/status.py --cloud ../stage2-data     # or merge with a checkout you already have
+python3 -I stage2/status.py                            # local data/ only, exactly as before
 ```
+
+On the Windows computer, copy `stage2/status.py` next to the local recorder and run it there; `--fetch-cloud` needs `git` on the PATH. The detailed sections describe the merged series; `--source local` or `--source cloud` switches them to one recorder without changing which series the rule uses. The "Sources compared" section at the end gives, for each series, valid slots, the longest gap, any gaps over 6 hours (one such gap inside an event's 30 h window is enough to fail it), and the valid-slot count for each 5pm event.
 
 ## Checks
 
 - `stage2-check.yml` runs on every pull request (or by hand): it takes one real snapshot on a GitHub runner, pushes nothing, and fails if Kalshi or Deribit did not answer.
+- `status-tests.yml` runs the `status.py` unit tests (`python3 -m unittest discover -s tests`) on synthetic recordings.
 - After merging, Actions tab → stage2-recorder → Run workflow with `max_minutes` = 12 starts recording at once instead of waiting for the cron. Then check `stage2-data` for snapshots with an empty `errors` list.
 
 ## Minutes

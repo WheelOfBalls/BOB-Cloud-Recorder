@@ -1,3 +1,6 @@
 __pycache__/
 *.pyc
 _data/
+stage2/status_cache*.json
+stage2/cloud_data/
+stage2/data/
