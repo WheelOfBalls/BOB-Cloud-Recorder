@@ -1,0 +1,33 @@
+# Stage 3 design checks. Synthetic power-simulation smoke test, plus a metadata-only discovery of which Kalshi crypto
+# series and Deribit chains exist (no prices or outcomes are printed). Does not touch the recorder or stage2-data.
+name: stage3-design
+
+on:
+  pull_request:
+    paths: ["docs/stage3/**", ".github/workflows/stage3-design.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  power-sim-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install numpy==2.3.4
+      - name: Quick synthetic power simulation with sanity checks
+        run: python docs/stage3/power_sim.py --quick
+  discover-series:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    # informational: a Kalshi or Deribit outage must not block the design PR
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: List series, settlement hours and strike spacing (metadata only)
+        run: python3 -I docs/stage3/discover_series.py
