@@ -1,2 +1,3 @@
 utc,btc_options,eth_options,kxbtcd_markets,kxethd_markets,books,books_truncated,btc_gap_s,eth_gap_s,btc_valid,eth_valid,duration_s,bytes,n_errors,errors
 2026-11-06T05:02:30.048135+00:00,186,200,238,350,20,0,0.38,0.34,1,1,6.9,29584,0,
+2026-11-06T05:07:30.048129+00:00,186,200,238,350,20,0,0.34,0.34,1,1,6.4,30130,0,

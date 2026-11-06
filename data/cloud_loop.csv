@@ -1,2 +1,3 @@
 kind,utc,run_id,event,late_s_or_cron,duration_s,status
 run_start,2026-11-06T05:01:16+00:00,42165875663,workflow_dispatch,,,pilot
+slot,2026-11-06T05:02:30+00:00,42165875663,workflow_dispatch,0.0,7.1,rc=0 pushed
