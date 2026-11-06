@@ -20,7 +20,7 @@
 #     whose better-side gap g (net of the taker fee 0.07 q (1-q)) exceeds TAU, buy 1 contract on that side at the
 #     touch. Same as stage 2's S2 when TAU = 0.
 #   - Statistic: mean net P&L per contract, pooled over trades, with a cluster-robust standard error where the
-#     cluster is a UTC day (all events, both coins). PASS if the one-sided 95% lower bound is > 0. KILL (decisive)
+#     cluster is a UTC day (all events, both coins). PASS if the one-sided 95% lower bound (Student t, days - 1 df) is > 0. KILL (decisive)
 #     if the one-sided 95% upper bound is < the minimum edge the test is sized for (1c), or if there are fewer than
 #     MIN_TRADES trades in total. Otherwise INCONCLUSIVE.
 #   - "Rough world": the true process adds Poisson jumps (JUMP_LAM a day, sd JUMP_SD) with total vol unchanged, and p_opt
@@ -55,7 +55,7 @@ def merton_p(F, K, tau_y, sig_d, lam, sj):
     if lam == 0:
         sd = sig_d * math.sqrt(tau_y); return ncdf((np.log(F / K) - 0.5 * sd * sd) / sd)
     m = lam * tau_y; out = 0.0; w = math.exp(-m)
-    for j in range(8):
+    for j in range(int(m + 8 * math.sqrt(m) + 10)):     # enough terms to hold all but ~1e-12 of the Poisson mass
         v = sig_d * sig_d * tau_y + j * sj * sj
         out = out + w * ncdf((np.log(F / K) - 0.5 * v) / math.sqrt(v))
         w *= m / (j + 1)
@@ -143,14 +143,19 @@ def decide(n, x, e_min):
     se = np.sqrt(D / (D - 1) * (resid**2).sum(axis=-1)) / np.maximum(N, 1)
     return mu, se
 
+def tcrit(df, z=1.6448536269514722):
+    """One-sided 95% Student t quantile (Cornish-Fisher; within 0.002 of the exact value for df >= 5)."""
+    return z + (z**3 + z) / (4 * df) + (5 * z**5 + 16 * z**3 + 3 * z) / (96 * df * df)
+
 def power_curve(n, x, days_list, e_min, reps, rng):
     rows = []
     for D in days_list:
         idx = rng.integers(0, len(n), size=(reps, D))
         mu, se = decide(n[idx], x[idx], e_min)
         N = n[idx].sum(axis=-1); enough = N >= MIN_TRADES
-        rows.append({"days": D, "pass": float(np.mean(enough & (mu - 1.645 * se > 0))),
-                     "kill": float(np.mean(~enough | (mu + 1.645 * se < e_min))), "mean_c": float(np.mean(mu) * 100),
+        t = tcrit(D - 1)
+        rows.append({"days": D, "pass": float(np.mean(enough & (mu - t * se > 0))),
+                     "kill": float(np.mean(~enough | (mu + t * se < e_min))), "mean_c": float(np.mean(mu) * 100),
                      "median_trades": float(np.median(N))})
     return rows
 
@@ -187,7 +192,7 @@ def main():
     results, pools = [], {}
     for lab, kind, coins, tau, snap, hedge, volerr, jumps in scen:
         for dl in deltas:
-            pd = min(pool_days, 400) if kind == "daily" else pool_days
+            pd = min(pool_days, 300) if kind == "daily" else pool_days
             n, p, h, g = pool(kind, coins, dl, tau, snap, hedge, volerr, jumps, pd, 10_000 * (1 + round(dl * 100)), a.workers)
             pools[(lab, dl)] = (n, p, h)
             for which, x in (("unhedged", p), ("hedged", h)):
@@ -212,6 +217,12 @@ def main():
                        "params": {"VOL0": VOL0, "VOL_SD_LOG": VOL_SD_LOG, "RHO": RHO, "HALF": HALF, "NOISE": NOISE,
                                   "STRIKE_STEP": STRIKE_STEP, "pool_days": pool_days, "reps": reps}}, f, indent=1)
     if a.quick:
+        # the jump-diffusion truth must match a Monte Carlo of the same process (30 h horizon, about 7.5 jumps)
+        mc = np.random.default_rng(1); F = 76000.0; Ks = np.array([74000.0, 76000.0, 78000.0]); ty = 30 / 24 / 365
+        lam, sj = JUMP_LAM * 365, JUMP_SD; sd = math.sqrt(VOL0**2 - lam * sj * sj); m = 400_000; nj = mc.poisson(lam * ty, m)
+        x = sd * math.sqrt(ty) * mc.normal(size=m) - 0.5 * sd * sd * ty - 0.5 * sj * sj * nj + np.sqrt(nj) * sj * mc.normal(size=m)
+        emp = np.array([(F * np.exp(x) > k).mean() for k in Ks])
+        assert np.all(np.abs(emp - merton_p(F, Ks, ty, sd, lam, sj)) < 0.004), (emp, merton_p(F, Ks, ty, sd, lam, sj))
         # smoke checks: the null world must rarely pass, and the hedge must cut the day-level spread
         lab = scen[0][0]
         null = curves[f"{lab} | hedged | delta=0c"]
