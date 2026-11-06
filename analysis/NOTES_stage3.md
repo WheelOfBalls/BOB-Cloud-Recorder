@@ -50,3 +50,5 @@
 ## What the fixtures show (synthetic only)
 
 On 22 synthetic days with an exact fair value: a planted 6¢ mispricing passes T1 (hedged estimate within noise of the ex-ante gap, hedged se about 10× smaller than unhedged); no mispricing gives no trades and a KILL; a fair value from a 30% too low volatility produces a positive ex-ante gap on many trades and still KILLs on realised P&L; maker fills that are always adverse KILL T2. With uninformed random fills a maker earns the half spread and T2 passes even with no mispricing, which is why only T1 can justify a next stage.
+
+**Deviation 1 (2026-11-06).** The row-sync threshold in item 8 now only flags rows (`sync_ok`); it no longer removes them from T1 or T2. T1 recomputed with the rule applied is reported as `T1_with_preregistered_row_sync_rule`. See the pre-registration's deviations log and `docs/stage3/REVIEW_code.md` finding 1.

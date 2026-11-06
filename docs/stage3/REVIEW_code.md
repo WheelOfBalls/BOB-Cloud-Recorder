@@ -8,7 +8,7 @@ Independent skeptical review, written 2026-11-06 (about 06:30 to 08:00 UTC) of t
 
 | # | Severity | Finding | Status |
 |---|---|---|---|
-| 1 | **Critical** | The pre-registered row-sync rule selects rows using `index_after`, read after the Kalshi quote. Under a zero-edge null this biases the hedged P&L upward by about 1 to 2¢ per contract | **Needs a deviation** (not applied) |
+| 1 | **Critical** | The pre-registered row-sync rule selects rows using `index_after`, read after the Kalshi quote. Under a zero-edge null this biases the hedged P&L upward by about 1 to 2¢ per contract | **Deviation 1**, applied 2026-11-06 (see the end of finding 1) |
 | 2 | High | The run chain ended with the pilot; the live start depended on a cron firing in a 5-hour window | Fixed in this PR |
 | 3 | High | Settlements came only from `GET /markets`; Kalshi moves older settled markets to `/historical/markets` | Fixed in this PR |
 | 4 | Medium | Same settlement gap in stage 2's `pull_after.py` (stage 2 pulls after 2026-11-19) | Flagged, not changed (stage 2) |
@@ -60,6 +60,16 @@ The size is large for hourly contracts because the threshold is small: 2.5 minut
 **Proposed deviation (for Mattias; not applied).** Drop the row-sync rule from the rows that T1 and T2 use. Keep it only as a reported figure ("T1 with the pre-registered row-sync rule"), never as a gate. The review that added it (`REVIEW.md`) meant it to drop rows whose quote may be out of sync. That job is already done without look-ahead by the 5-second validity rule, the hedge starting at `index_after`, and the stale-quote split, which uses only data from before the snapshot. A weaker alternative is a rule that uses only data from before the quote (for example |`index_before` − the last 1-minute poll before the chain request| > 0.1·F σ√τ). That one is unbiased, but it measures something different, and the stale-quote split already reports it.
 
 Either version changes `analyze_stage3.py`, which is frozen, so it needs a deviations-log entry in the pre-registration, a re-freeze (`FROZEN_stage3.md`), and a regression test (the end-to-end world above, which with the rule removed should give no PASS at zero edge). It must be done **before 2026-11-20 00:00 UTC**, while no live data exists. I did not edit either file.
+
+**Update, 2026-11-06 about 06:51 UTC: applied as deviation 1.** The coordinator approved the recommended option under Mattias's delegation, and Mattias can revert it before 2026-11-20 00:00 UTC. The pre-registration's deviations log now records it, and `analyze_stage3.py` flags rows instead of dropping them and reports `T1_with_preregistered_row_sync_rule`. The new hashes are in `FROZEN_stage3.md`. The zero-edge check was re-run on the changed code with `docs/stage3/review_code/e2e_sync_dev1.py` (seeds 1 to 3):
+
+| seed | T1 trades | T1 hedged [bounds] | T1 verdict | reference: rule applied, hedged |
+|---|---|---|---|---|
+| 1 | 553 | −1.93¢ [−3.60, −0.26] | KILL | −0.82¢ (189 trades) |
+| 2 | 520 | −0.82¢ [−2.37, +0.73] | KILL | +3.26¢ [+0.57, +5.94] (168 trades) |
+| 3 | 558 | −2.87¢ [−4.39, −1.34] | KILL | +0.10¢ (158 trades) |
+
+T1 now equals the "rule off" arm above to the digit, and the reference figure reproduces the old biased values, so the lift is gone from the test and visible only in the reported figure.
 
 ## 2. High (fixed): the run chain broke at the end of the pilot
 
