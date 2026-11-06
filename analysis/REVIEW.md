@@ -49,7 +49,7 @@ What this means:
 - **A PASS is weaker still.** In a world with no edge and 4¢ of p_opt noise, S1 and S2 both pass about 20% of the time. S1 then says more about p_opt noise against the trading costs than about an edge. The bootstrap CI for S2 will be very wide, and it should be read that way.
 - The pre-registration already says all-pass "does not validate an edge". It does not say that a kill is just as weak.
 
-**[decision]** Options, in order of preference:
+**Decided 2026-11-06 03:14 UTC by Mattias: option 1, logged as deviation 5 in the pre-registration.** The options were:
 1. *(recommended)* Leave the gates unchanged, and add a sentence to the pre-registration now, before results: "S2 has low power with 10 to 13 events. A simulation gives about a 40% chance of killing a true 5¢ mispricing, so an S2 kill is recorded as a kill, but it is not evidence that no mispricing exists." This changes nothing about the verdicts. It only fixes how they are read, while that can still be done blind.
 2. Make S2 a reported-only statistic and leave S1 and S3 as the gates. This is a real rule change, and it would read as a rescue if decided after any result, so it is only defensible now.
 3. Change nothing.
