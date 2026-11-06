@@ -630,6 +630,28 @@ def run_tests(rep, grid, row_cache, results, tapes_dir, now, verbose_lines):
     return out
 
 
+def preflight(rep):
+    """Runs the fair-value and row pipeline on the merged series and prints counts only: no prices, gaps, p_opt,
+    outcomes or trades. Meant to catch format or fitting problems on real data before the one-shot run."""
+    fitted, rows, dropped, books, brackets = collections.Counter(), collections.Counter(), collections.Counter(), [0, 0], 0
+    for m in rep["pick"].values():
+        if m is None:
+            continue
+        rs, bs, dr, k = snapshot_rows(m)
+        fitted[k] += 1; brackets += len(bs)
+        for r in rs:
+            rows[r["event"]] += 1
+            books[0] += 1; books[1] += r["yes_depth_book"] is not None
+        for ev in dr:
+            dropped[ev] += 1
+    out = ["\n== preflight (counts only)", "   valid snapshots by number of fitted Deribit expiries: " +
+           ", ".join(f"{k}: {v}" for k, v in sorted(fitted.items()))]
+    for ev in sorted(set(rows) | set(dropped)):
+        out.append(f"   {ev:22s} rows {rows[ev]:6d}  dropped for lack of a fair value {dropped[ev]}")
+    out.append(f"   rows with a recorded order book {books[1]} of {books[0]}; KXBTC bracket rows {brackets}")
+    return out
+
+
 def fmt_est(x, pct=False):
     if not x or x.get("est") is None:
         return "n/a"
@@ -640,7 +662,7 @@ def fmt_est(x, pct=False):
 def main(argv=None):
     here = os.path.dirname(os.path.abspath(__file__))
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("mode", choices=("coverage", "run"))
+    ap.add_argument("mode", choices=("coverage", "preflight", "run"))
     ap.add_argument("--local", help="local Windows recorder data/ folder")
     ap.add_argument("--cloud", help="cloud recorder data/ folder (a checkout of the stage2-data branch, its data/)")
     ap.add_argument("--settlements", help="settlements.json from pull_after.py")
@@ -680,6 +702,8 @@ def main(argv=None):
 
     if a.mode == "coverage":
         print("\n".join(lines)); return 0
+    if a.mode == "preflight":
+        lines += preflight(reps["merged"]); print("\n".join(lines)); return 0
 
     # ---------------- run: the one-shot test ----------------
     if not (a.settlements and a.trades and a.out):
