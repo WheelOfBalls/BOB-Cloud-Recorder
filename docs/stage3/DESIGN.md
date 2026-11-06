@@ -4,7 +4,7 @@ Written 2026-11-06, while stage 2 is still recording. **Nothing here used real s
 
 > **Red-team review (2026-11-06): the power figures below are superseded.** See [`REVIEW.md`](REVIEW.md). The constant-offset mispricing in `power_sim.py` creates near-riskless trades in the tails, and the fair value is closer to the truth than it can be at hourly horizons. With both corrected, the test decides reliably in 28 days at a mispricing of about 6¢ (1¢ half spread) or 7 to 8¢ (2¢), not 4¢. The structure of the test (outcome-scored, day clusters, hedge as a control variate) holds, with a fix to where the hedge starts.
 
-The pre-registration that follows from this is [`PREREGISTRATION_stage3.md`](PREREGISTRATION_stage3.md). **Approved by Mattias on 2026-11-06 and frozen** (see its banner for how the approval was given). Frozen sha256: `acb651f17b8f5d475f29c6cf0d2a71e9f2178aba27887cbcf0840ccf4c1dac7d`. If the file's sha256 differs from this, it was changed after the freeze, and the change must appear in its deviations log.
+The pre-registration that follows from this is [`PREREGISTRATION_stage3.md`](PREREGISTRATION_stage3.md). **Approved by Mattias on 2026-11-06 and frozen** (see its banner for how the approval was given). Frozen sha256: `a62576a867276b45bda07398f4fa804b44f275d054dfa653510814ee69c3c515`. If the file's sha256 differs from this, it was changed after the freeze, and the change must appear in its deviations log.
 
 ## In short
 

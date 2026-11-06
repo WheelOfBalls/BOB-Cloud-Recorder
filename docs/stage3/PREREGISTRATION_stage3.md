@@ -35,7 +35,7 @@ Stage 2 asks whether Kalshi's 5pm KXBTCD contracts are mispriced against Deribit
 
 ## Fair value
 
-As stage 2, with its review fix: total variance w(k) fitted per expiry as a cubic in k = ln(K/F) on two-sided **out-of-the-money** mids (calls K ≥ F, puts K < F) with `mark_iv` present, at least 4 options. A close before the first expiry scales that expiry's w by τ_T/τ_1. Otherwise w is interpolated linearly in calendar time at fixed k. p_opt = (C(K − h) − C(K + h)) / (2h), with h = $50 for BTC (as stage 2) and h = $2.50 for ETH (the same share of spot, roughly). No intraday variance clock, no discount.
+As stage 2, with its review fix: total variance w(k) fitted per expiry as a cubic in k = ln(K/F) on two-sided **out-of-the-money** mids (calls K ≥ F, puts K < F) with `mark_iv` present, at least 4 options. A close before the first expiry scales that expiry's w by τ_T/τ_1. Otherwise w is interpolated linearly in calendar time at fixed k. p_opt = (C(K − h) − C(K + h)) / (2h), with the step h given below. No intraday variance clock, no discount.
 
 - **No look-ahead [review]:** p_opt uses only data whose request ended before the Kalshi request started. For a close before the first expiry the forward is `index_before`, not the expiry's `underlying_price` (that is the 08:00 forward, which is off by the futures basis, and the basis matters at minutes to close).
 - **Difference step [review]:** h = min($50, 0.1 · F · σ√τ) for BTC and min($2.50, 0.1 · F · σ√τ) for ETH, where σ√τ is the fitted at-the-money total sd to the close. A fixed $50 is about as wide as the whole distribution 5 minutes before an hourly close and smooths p_opt towards 50¢.
@@ -69,7 +69,7 @@ t is the one-sided 95% Student t quantile with D − 1 degrees of freedom.
 - **PASS on T1** means a positive mean net P&L at 95% one-sided, with the unhedged figure agreeing in sign.
 - T2's power is not estimated (no fill model is assumed). Its gate is recorded, but its verdict is read as weaker than T1's.
 - **Only T1 can justify a next stage [review].** A T2 PASS alone is reported but does not justify the paper test, so the two gates don't double the chance of a false go-ahead. Splits by coin, hour or minutes to close are unadjusted, never gates.
-- **Expected power (from REVIEW.md, synthetic, not a promise) [review]:** T1 decides reliably only when the true net edge per contract is about 1¢ or more. In the review's harsher synthetic world (mispricing fading out at the tails, timing fixed) that takes a Kalshi mispricing of about 6¢ at a 1¢ half spread (net 1.7¢, T1 passes 99% at 28 days) and about 7 to 8¢ at a 2¢ half spread, not 4¢. There a 4¢ mispricing nets about 0¢ at a 1¢ half spread (KILL 96%), and 5¢ nets 0.8¢ (PASS 64%, KILL 13%, otherwise INCONCLUSIVE). The counts-only pilot's spread histogram is recorded next to this before approval; it changes no gate.
+- **Expected power (from REVIEW.md, synthetic, not a promise) [review]:** T1 decides reliably only when the true net edge per contract is about 1¢ or more. In the review's harsher synthetic world (mispricing fading out at the tails, timing fixed) that takes a Kalshi mispricing of about 6¢ at a 1¢ half spread (net 1.7¢, T1 passes 99% at 28 days) and about 7 to 8¢ at a 2¢ half spread, not 4¢. There a 4¢ mispricing nets about 0¢ at a 1¢ half spread (KILL 96%), and 5¢ nets 0.8¢ (PASS 64%, KILL 13%, otherwise INCONCLUSIVE). The counts-only pilot's spread histogram is recorded next to this before the start; it changes no gate.
 
 ## How outcomes will be read (fixed now)
 
