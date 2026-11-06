@@ -1,0 +1,60 @@
+# Stage 3 recorder (docs/stage3/PREREGISTRATION_stage3.md). Public read-only Kalshi and Deribit data; no secrets,
+# no accounts, no orders. Separate from stage 2: own workflow, concurrency group and data branches; stage 2's
+# recorder, code and stage2-data branch are not touched.
+#
+# stage3/cloud_loop.py --which decides what a run does, from the dates in stage3/:
+#   pilot (until pilot_until_utc.txt)       -> records to stage3-pilot; counts-only report in report/ on that branch
+#   live  (start_utc.txt to end_utc.txt)    -> records to stage3-data, for the pre-registered test
+#   off   (otherwise)                       -> exits at once
+# Each run loops for about 5h40m. The cron fires every 20 minutes so a run is almost always queued behind the
+# active one; the concurrency group keeps one running and at most one waiting.
+name: stage3-recorder
+
+on:
+  schedule:
+    - cron: "6,26,46 * * * *"   # off stage 2's :11/:31/:51 and off the top of the hour
+  workflow_dispatch:
+    inputs:
+      max_minutes:
+        description: "How long this run records (minutes)."
+        default: "340"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stage3-recorder
+  cancel-in-progress: false
+
+jobs:
+  record:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decide the mode and check out its data branch
+        run: |
+          read mode branch < <(python3 -I stage3/cloud_loop.py --which)
+          echo "mode=$mode" >> "$GITHUB_ENV"; echo "branch=$branch" >> "$GITHUB_ENV"
+          echo "Mode: $mode, branch: ${branch:-none}"
+          [ "$mode" = off ] && exit 0
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin "$branch" >/dev/null; then
+            git fetch -q --depth=20 origin "$branch"
+            git worktree add -q -B "$branch" _data "origin/$branch"
+          else
+            git worktree add -q --orphan -b "$branch" _data
+          fi
+      - name: Record
+        if: env.mode != 'off'
+        env:
+          BOB_CRON: ${{ github.event.schedule }}
+        run: python3 -I stage3/cloud_loop.py --mode "$mode" --data _data --max-minutes "${{ inputs.max_minutes || '340' }}"
+      - name: Counts-only report (pilot only)
+        if: always() && env.mode == 'pilot'
+        run: |
+          python3 -I stage3/counts_report.py --data _data/data --out _data/report/pilot_report.md --json _data/report/pilot_report.json > /dev/null
+          cat _data/report/pilot_report.md >> "$GITHUB_STEP_SUMMARY"
+          cd _data && git add -A && { git diff --cached --quiet || git commit -q -m "stage3 pilot counts report"; }
+          for w in 0 2 4 8; do sleep $w; git push -q origin "HEAD:$branch" && break; git pull -q --rebase origin "$branch"; done

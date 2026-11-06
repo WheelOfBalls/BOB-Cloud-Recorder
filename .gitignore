@@ -4,3 +4,4 @@ _data/
 stage2/status_cache*.json
 stage2/cloud_data/
 stage2/data/
+stage3/data/
