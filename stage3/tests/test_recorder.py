@@ -171,12 +171,22 @@ class TestLoop(unittest.TestCase):
     def test_modes(self):
         ts = lambda *a: dt.datetime(*a, tzinfo=UTC).timestamp()
         self.assertEqual(cl.mode_at(ts(2026, 11, 6, 12), self.W), "pilot")
-        self.assertEqual(cl.mode_at(ts(2026, 11, 8, 6), self.W), "off")
-        self.assertEqual(cl.mode_at(ts(2026, 11, 19, 18, 59), self.W), "off")
+        self.assertEqual(cl.mode_at(ts(2026, 11, 8, 6), self.W), "wait")        # chain kept alive to the live lead
+        self.assertEqual(cl.mode_at(ts(2026, 11, 19, 18, 59), self.W), "wait")
         self.assertEqual(cl.mode_at(ts(2026, 11, 19, 19, 0), self.W), "live")     # may start 5 h early and wait
         self.assertEqual(cl.mode_at(ts(2026, 12, 17, 23, 59), self.W), "live")
         self.assertEqual(cl.mode_at(ts(2026, 12, 18), self.W), "off")
+        self.assertEqual(cl.mode_at(ts(2027, 1, 1), self.W), "off")
         self.assertEqual(cl.slot_range("live", self.W), (self.W["start"], self.W["end"]))
+        self.assertEqual(cl.slot_range("wait", self.W), (0.0, 0.0))             # a wait run records nothing
+
+    def test_wait_hands_over_to_live(self):
+        ts = lambda *a: dt.datetime(*a, tzinfo=UTC).timestamp()
+        # far from the start: the run sleeps its full length; near it: until a minute into the live lead
+        self.assertEqual(cl.wait_until(ts(2026, 11, 10), self.W, 340), ts(2026, 11, 10) + 340 * 60)
+        u = cl.wait_until(ts(2026, 11, 19, 17), self.W, 340)
+        self.assertEqual(u, ts(2026, 11, 19, 19, 1))
+        self.assertEqual(cl.mode_at(u, self.W), "live")
 
     def test_files_match(self):
         w = cl.windows()
