@@ -1,9 +1,9 @@
-# Tests for the stage 2 analysis, on synthetic fixtures only. Does not touch the recorder or the stage2-data branch.
+# Tests for the stage 2 and stage 3 analyses, on synthetic fixtures only. Does not touch the recorder or the stage2-data branch.
 name: analysis-tests
 
 on:
   pull_request:
-    paths: ["analysis/**", "docs/**", ".github/workflows/analysis-tests.yml"]
+    paths: ["analysis/**", "docs/**", "stage3/*_utc.txt", ".github/workflows/analysis-tests.yml"]
   push:
     branches: [main]
     paths: ["analysis/**", ".github/workflows/analysis-tests.yml"]
