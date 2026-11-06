@@ -1,6 +1,6 @@
 # Stage 2 analysis: readings of the pre-registration
 
-`analyze_stage2.py` follows `docs/PREREGISTRATION_stage2.md` (a verbatim copy of `stage2/PREREGISTRATION.md` in the BOB folder, sha256 `e2dee34a…233e`), including deviations 3 and 4. The pre-registration leaves the points below open. Each one lists the reading the script takes and the main alternative, so a reviewer can object before the test runs. None of these was chosen by looking at data: the script was written and tested on synthetic fixtures only. The only real file opened was one snapshot from 2026-11-05 16:23 UTC, for the file format. That event cannot qualify (deviation 3), and no outcome or trade was looked at.
+`analyze_stage2.py` follows `docs/PREREGISTRATION_stage2.md` (a verbatim copy of `stage2/PREREGISTRATION.md` in the BOB folder, sha256 `2f81bc69…5944` since deviation 5; `e2dee34a…233e` before it), including deviations 3 to 5. Deviation 5 only fixes how S2 is read, so the code did not change. The pre-registration leaves the points below open. Each one lists the reading the script takes and the main alternative, so a reviewer can object before the test runs. None of these was chosen by looking at data: the script was written and tested on synthetic fixtures only. The only real file opened was one snapshot from 2026-11-05 16:23 UTC, for the file format. That event cannot qualify (deviation 3), and no outcome or trade was looked at.
 
 Items marked **(material)** could plausibly move a result.
 

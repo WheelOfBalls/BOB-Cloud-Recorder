@@ -4,7 +4,7 @@ Scope: `analyze_stage2.py`, `pull_after.py`, `NOTES.md`, `tests/` and `docs/PRER
 
 The review experiments are in `analysis/review/` and can be rerun (`python3 analysis/review/fitnoise.py`, `power.py`, `daysd.py`).
 
-**Frozen script after this review:** `analyze_stage2.py` sha256 `94038f00a0fe0c7109162278c226439e7285584219835fa7fa544a7046f6f2ca`. The result file records the sha256 of the script that produced it. If the two differ, the run used a changed script and needs explaining.
+**Frozen script after this review:** `analyze_stage2.py` sha256 `c0b3dca6c3b9a00364d2bc7b84ca0960bb346d8f28c32a55647d2907cc49e379` (main after PRs #5 and #6). PR #5 added the counts-only `preflight` mode. It was checked here too: it prints fitted-expiry, row and book counts per event, and no prices, gaps, p_opt, outcomes or trades, so it can't leak a result. The result file records the sha256 of the script that produced it. If the two differ, the run used a changed script and needs explaining.
 
 **Needs Mattias:** items marked **[decision]** would change a pre-registered rule, so they need a new deviation that only Mattias can approve. Nothing here was changed on his behalf.
 
@@ -49,7 +49,7 @@ What this means:
 - **A PASS is weaker still.** In a world with no edge and 4¢ of p_opt noise, S1 and S2 both pass about 20% of the time. S1 then says more about p_opt noise against the trading costs than about an edge. The bootstrap CI for S2 will be very wide, and it should be read that way.
 - The pre-registration already says all-pass "does not validate an edge". It does not say that a kill is just as weak.
 
-**[decision]** Options, in order of preference:
+**Decided 2026-11-06 03:14 UTC by Mattias: option 1, logged as deviation 5 in the pre-registration.** The options were:
 1. *(recommended)* Leave the gates unchanged, and add a sentence to the pre-registration now, before results: "S2 has low power with 10 to 13 events. A simulation gives about a 40% chance of killing a true 5¢ mispricing, so an S2 kill is recorded as a kill, but it is not evidence that no mispricing exists." This changes nothing about the verdicts. It only fixes how they are read, while that can still be done blind.
 2. Make S2 a reported-only statistic and leave S1 and S3 as the gates. This is a real rule change, and it would read as a rescue if decided after any result, so it is only defensible now.
 3. Change nothing.
