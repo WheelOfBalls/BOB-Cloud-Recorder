@@ -58,3 +58,7 @@ Items marked **(material)** could plausibly move a result.
 - The 0.10% index-move rule compares two separate index calls. `index_after` is taken after the KXBTCD pull but before the KXBTC pull, so brackets fall outside the synchronised window by about a second.
 - Kalshi settles on the CF Benchmarks BRTI, while the fair value uses Deribit's forward. This is a known limit in the pre-registration and is not corrected here.
 - Runtime: about 60 s per 10 days of synthetic snapshots with 70 options each. Real snapshots carry about 290 options, so expect several minutes.
+
+## Preflight on real data (2026-11-06 02:30 UTC)
+
+`analyze_stage2.py preflight` runs the fair-value and row pipeline and prints counts only: no prices, gaps, p_opt values, outcomes or trades. It was run on the 83 cloud snapshots that existed at the time (Nov 5 19:28 to Nov 6 02:23 UTC). Every valid snapshot fitted all 5 Deribit expiries. That gave 1,355 candidate rows, and every one had a recorded order book. One row was dropped for lack of a fair value, on the Nov 5 event (which cannot qualify), about 2 hours before its close. This checks that the code handles the real file format. It says nothing about the result.
