@@ -22,6 +22,8 @@ jobs:
       - run: pip install numpy==2.3.4
       - name: Quick synthetic power simulation with sanity checks
         run: python docs/stage3/power_sim.py --quick
+      - name: Red-team simulation checks (exact truth, hedge timing bias)
+        run: python docs/stage3/power_sim_redteam.py --quick
   discover-series:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
