@@ -1,0 +1,58 @@
+{
+ "generated_utc": "2026-11-06T05:33:59+00:00",
+ "snapshots": 7,
+ "unreadable": 0,
+ "modes": {
+  "pilot": 7
+ },
+ "days": {
+  "2026-11-06": {
+   "slots": 7,
+   "recorded": 7,
+   "btc": 7,
+   "eth": 7,
+   "both": 7
+  }
+ },
+ "timing": {
+  "late": "0.05 / 0.05 / 0.05 / 0.05",
+  "duration": "5.87 / 6.40 / 6.93 / 6.93",
+  "books": "18.00 / 20.00 / 20.00 / 20.00",
+  "kb": "29.35 / 29.46 / 29.56 / 29.56",
+  "books_truncated": 0
+ },
+ "events_BTC": {
+  "hourly": 1,
+  "hours": 0,
+  "missing": 0,
+  "missing_not_daily": []
+ },
+ "events_ETH": {
+  "hourly": 1,
+  "hours": 0,
+  "missing": 0,
+  "missing_not_daily": []
+ },
+ "spreads": {
+  "1": 79,
+  "2": 12,
+  "3": 2,
+  "4": 3,
+  "5": 1,
+  "6-10": 3,
+  ">10": 1
+ },
+ "rows": {
+  "BTC": 55,
+  "ETH": 46
+ },
+ "index_BTC": {
+  "minutes": 32,
+  "ok": 32
+ },
+ "index_ETH": {
+  "minutes": 32,
+  "ok": 32
+ },
+ "errors": {}
+}
