@@ -1,0 +1,1762 @@
+{
+ "size": [
+  {
+   "case": "no timing error, hedge at quote",
+   "trades_per_day": 578.4,
+   "true_net_edge_c": 0.0,
+   "hedged_mean_c": -0.04,
+   "unhedged_mean_c": -0.11,
+   "exante_gap_c": 5.35,
+   "sd_day_hedged_c": 1.62,
+   "sd_day_unhedged_c": 3.09,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.0215,
+     "pass_hedged_only": 0.03375,
+     "pass_unhedged_lb": 0.04175,
+     "kill": 0.7375
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.024,
+     "pass_hedged_only": 0.0345,
+     "pass_unhedged_lb": 0.036,
+     "kill": 0.8725
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.01975,
+     "pass_hedged_only": 0.03175,
+     "pass_unhedged_lb": 0.03625,
+     "kill": 0.94375
+    },
+    {
+     "days": 42,
+     "pass_T1": 0.0195,
+     "pass_hedged_only": 0.0335,
+     "pass_unhedged_lb": 0.03225,
+     "kill": 0.99075
+    },
+    {
+     "days": 56,
+     "pass_T1": 0.02,
+     "pass_hedged_only": 0.03175,
+     "pass_unhedged_lb": 0.02925,
+     "kill": 0.99775
+    }
+   ]
+  },
+  {
+   "case": "5 s async, hedge from index before Kalshi",
+   "trades_per_day": 580.7,
+   "true_net_edge_c": 0.0,
+   "hedged_mean_c": 0.1,
+   "unhedged_mean_c": -0.13,
+   "exante_gap_c": 5.41,
+   "sd_day_hedged_c": 1.64,
+   "sd_day_unhedged_c": 3.14,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.037,
+     "pass_hedged_only": 0.06175,
+     "pass_unhedged_lb": 0.0485,
+     "kill": 0.64225
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.04375,
+     "pass_hedged_only": 0.07825,
+     "pass_unhedged_lb": 0.039,
+     "kill": 0.766
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.0495,
+     "pass_hedged_only": 0.0795,
+     "pass_unhedged_lb": 0.035,
+     "kill": 0.8705
+    },
+    {
+     "days": 42,
+     "pass_T1": 0.05,
+     "pass_hedged_only": 0.09325,
+     "pass_unhedged_lb": 0.04075,
+     "kill": 0.959
+    },
+    {
+     "days": 56,
+     "pass_T1": 0.0555,
+     "pass_hedged_only": 0.1045,
+     "pass_unhedged_lb": 0.025,
+     "kill": 0.99
+    }
+   ]
+  },
+  {
+   "case": "5 s async, hedge from 1-min grid (as drafted)",
+   "trades_per_day": 580.7,
+   "true_net_edge_c": 0.0,
+   "hedged_mean_c": 0.08,
+   "unhedged_mean_c": -0.06,
+   "exante_gap_c": 5.41,
+   "sd_day_hedged_c": 1.63,
+   "sd_day_unhedged_c": 3.12,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.03825,
+     "pass_hedged_only": 0.0635,
+     "pass_unhedged_lb": 0.048,
+     "kill": 0.653
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.0415,
+     "pass_hedged_only": 0.0685,
+     "pass_unhedged_lb": 0.0465,
+     "kill": 0.79325
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.0455,
+     "pass_hedged_only": 0.07525,
+     "pass_unhedged_lb": 0.04375,
+     "kill": 0.87425
+    },
+    {
+     "days": 42,
+     "pass_T1": 0.053,
+     "pass_hedged_only": 0.08625,
+     "pass_unhedged_lb": 0.043,
+     "kill": 0.96375
+    },
+    {
+     "days": 56,
+     "pass_T1": 0.0535,
+     "pass_hedged_only": 0.0915,
+     "pass_unhedged_lb": 0.039,
+     "kill": 0.98775
+    }
+   ]
+  },
+  {
+   "case": "5 s async, p_opt before + hedge after (fix)",
+   "trades_per_day": 580.7,
+   "true_net_edge_c": 0.0,
+   "hedged_mean_c": -0.03,
+   "unhedged_mean_c": -0.06,
+   "exante_gap_c": 5.41,
+   "sd_day_hedged_c": 1.63,
+   "sd_day_unhedged_c": 3.12,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.02725,
+     "pass_hedged_only": 0.04225,
+     "pass_unhedged_lb": 0.05025,
+     "kill": 0.72125
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.023,
+     "pass_hedged_only": 0.034,
+     "pass_unhedged_lb": 0.045,
+     "kill": 0.8635
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.02325,
+     "pass_hedged_only": 0.03375,
+     "pass_unhedged_lb": 0.0545,
+     "kill": 0.935
+    },
+    {
+     "days": 42,
+     "pass_T1": 0.0175,
+     "pass_hedged_only": 0.02975,
+     "pass_unhedged_lb": 0.043,
+     "kill": 0.98625
+    },
+    {
+     "days": 56,
+     "pass_T1": 0.02025,
+     "pass_hedged_only": 0.03225,
+     "pass_unhedged_lb": 0.04225,
+     "kill": 0.99875
+    }
+   ]
+  },
+  {
+   "case": "30 s async, hedge from index before Kalshi",
+   "trades_per_day": 583.4,
+   "true_net_edge_c": 0.0,
+   "hedged_mean_c": 0.53,
+   "unhedged_mean_c": -0.04,
+   "exante_gap_c": 5.64,
+   "sd_day_hedged_c": 1.62,
+   "sd_day_unhedged_c": 3.14,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.18,
+     "pass_hedged_only": 0.31325,
+     "pass_unhedged_lb": 0.04525,
+     "kill": 0.30525
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.25025,
+     "pass_hedged_only": 0.434,
+     "pass_unhedged_lb": 0.048,
+     "kill": 0.37625
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.29875,
+     "pass_hedged_only": 0.525,
+     "pass_unhedged_lb": 0.04375,
+     "kill": 0.45775
+    },
+    {
+     "days": 42,
+     "pass_T1": 0.35725,
+     "pass_hedged_only": 0.68325,
+     "pass_unhedged_lb": 0.04275,
+     "kill": 0.58775
+    },
+    {
+     "days": 56,
+     "pass_T1": 0.38475,
+     "pass_hedged_only": 0.779,
+     "pass_unhedged_lb": 0.04125,
+     "kill": 0.701
+    }
+   ]
+  }
+ ],
+ "power": [
+  {
+   "world": "design-rough",
+   "half_c": 1,
+   "delta_c": 0,
+   "trades_per_day": 428.1,
+   "true_net_edge_c": -1.89,
+   "hedged_mean_c": -1.91,
+   "unhedged_mean_c": -2.01,
+   "exante_gap_c": 3.25,
+   "sd_day_hedged_c": 1.88,
+   "sd_day_unhedged_c": 3.11,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.0,
+     "pass_hedged_only": 0.0,
+     "pass_unhedged_lb": 0.00025,
+     "kill": 0.99675
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.0,
+     "pass_hedged_only": 0.0,
+     "pass_unhedged_lb": 0.0,
+     "kill": 1.0
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.0,
+     "pass_hedged_only": 0.0,
+     "pass_unhedged_lb": 0.0,
+     "kill": 1.0
+    },
+    {
+     "days": 42,
+     "pass_T1": 0.0,
+     "pass_hedged_only": 0.0,
+     "pass_unhedged_lb": 0.0,
+     "kill": 1.0
+    },
+    {
+     "days": 56,
+     "pass_T1": 0.0,
+     "pass_hedged_only": 0.0,
+     "pass_unhedged_lb": 0.0,
+     "kill": 1.0
+    }
+   ]
+  },
+  {
+   "world": "design-rough",
+   "half_c": 1,
+   "delta_c": 4,
+   "trades_per_day": 646.5,
+   "true_net_edge_c": 1.43,
+   "hedged_mean_c": 1.42,
+   "unhedged_mean_c": 1.76,
+   "exante_gap_c": 3.59,
+   "sd_day_hedged_c": 1.42,
+   "sd_day_unhedged_c": 3.33,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.892,
+     "pass_hedged_only": 0.9095,
+     "pass_unhedged_lb": 0.601,
+     "kill": 0.00025
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.9695,
+     "pass_hedged_only": 0.97425,
+     "pass_unhedged_lb": 0.7655,
+     "kill": 0.0
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.98975,
+     "pass_hedged_only": 0.99175,
+     "pass_unhedged_lb": 0.869,
+     "kill": 0.0
+    },
+    {
+     "days": 42,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.96325,
+     "kill": 0.0
+    },
+    {
+     "days": 56,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.989,
+     "kill": 0.0
+    }
+   ]
+  },
+  {
+   "world": "design-rough",
+   "half_c": 1,
+   "delta_c": 5,
+   "trades_per_day": 819.2,
+   "true_net_edge_c": 2.81,
+   "hedged_mean_c": 2.83,
+   "unhedged_mean_c": 2.52,
+   "exante_gap_c": 3.97,
+   "sd_day_hedged_c": 0.92,
+   "sd_day_unhedged_c": 2.81,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.9995,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.95025,
+     "kill": 0.0
+    },
+    {
+     "days": 21,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.99075,
+     "kill": 0.0
+    },
+    {
+     "days": 28,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.99925,
+     "kill": 0.0
+    },
+    {
+     "days": 42,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 56,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    }
+   ]
+  },
+  {
+   "world": "redteam-as-drafted",
+   "half_c": 1,
+   "delta_c": 0,
+   "trades_per_day": 524.5,
+   "true_net_edge_c": -1.97,
+   "hedged_mean_c": -1.73,
+   "unhedged_mean_c": -2.0,
+   "exante_gap_c": 4.65,
+   "sd_day_hedged_c": 1.85,
+   "sd_day_unhedged_c": 3.11,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.0,
+     "pass_hedged_only": 0.0,
+     "pass_unhedged_lb": 0.0,
+     "kill": 0.99825
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.0,
+     "pass_hedged_only": 0.0,
+     "pass_unhedged_lb": 0.0,
+     "kill": 1.0
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.0,
+     "pass_hedged_only": 0.0,
+     "pass_unhedged_lb": 0.0,
+     "kill": 1.0
+    },
+    {
+     "days": 42,
+     "pass_T1": 0.0,
+     "pass_hedged_only": 0.0,
+     "pass_unhedged_lb": 0.0,
+     "kill": 1.0
+    },
+    {
+     "days": 56,
+     "pass_T1": 0.0,
+     "pass_hedged_only": 0.0,
+     "pass_unhedged_lb": 0.0,
+     "kill": 1.0
+    }
+   ]
+  },
+  {
+   "world": "redteam-as-drafted",
+   "half_c": 1,
+   "delta_c": 4,
+   "trades_per_day": 642.9,
+   "true_net_edge_c": 0.58,
+   "hedged_mean_c": 0.68,
+   "unhedged_mean_c": 0.46,
+   "exante_gap_c": 4.65,
+   "sd_day_hedged_c": 1.29,
+   "sd_day_unhedged_c": 2.98,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.46475,
+     "pass_hedged_only": 0.61025,
+     "pass_unhedged_lb": 0.14025,
+     "kill": 0.209
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.59925,
+     "pass_hedged_only": 0.7575,
+     "pass_unhedged_lb": 0.1745,
+     "kill": 0.28025
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.677,
+     "pass_hedged_only": 0.84125,
+     "pass_unhedged_lb": 0.20475,
+     "kill": 0.35525
+    },
+    {
+     "days": 42,
+     "pass_T1": 0.797,
+     "pass_hedged_only": 0.94725,
+     "pass_unhedged_lb": 0.27825,
+     "kill": 0.46175
+    },
+    {
+     "days": 56,
+     "pass_T1": 0.8605,
+     "pass_hedged_only": 0.9825,
+     "pass_unhedged_lb": 0.311,
+     "kill": 0.56225
+    }
+   ]
+  },
+  {
+   "world": "redteam-as-drafted",
+   "half_c": 1,
+   "delta_c": 5,
+   "trades_per_day": 805.0,
+   "true_net_edge_c": 1.99,
+   "hedged_mean_c": 2.07,
+   "unhedged_mean_c": 2.21,
+   "exante_gap_c": 4.69,
+   "sd_day_hedged_c": 1.08,
+   "sd_day_unhedged_c": 2.69,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.999,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.89825,
+     "kill": 0.0
+    },
+    {
+     "days": 21,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.981,
+     "kill": 0.0
+    },
+    {
+     "days": 28,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.995,
+     "kill": 0.0
+    },
+    {
+     "days": 42,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.9995,
+     "kill": 0.0
+    },
+    {
+     "days": 56,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    }
+   ]
+  },
+  {
+   "world": "redteam-fixed",
+   "half_c": 1,
+   "delta_c": 0,
+   "trades_per_day": 524.5,
+   "true_net_edge_c": -1.97,
+   "hedged_mean_c": -2.01,
+   "unhedged_mean_c": -2.0,
+   "exante_gap_c": 4.65,
+   "sd_day_hedged_c": 1.83,
+   "sd_day_unhedged_c": 3.11,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.0,
+     "pass_hedged_only": 0.0,
+     "pass_unhedged_lb": 0.0,
+     "kill": 0.9995
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.0,
+     "pass_hedged_only": 0.0,
+     "pass_unhedged_lb": 0.0,
+     "kill": 1.0
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.0,
+     "pass_hedged_only": 0.0,
+     "pass_unhedged_lb": 0.0,
+     "kill": 1.0
+    },
+    {
+     "days": 42,
+     "pass_T1": 0.0,
+     "pass_hedged_only": 0.0,
+     "pass_unhedged_lb": 0.0,
+     "kill": 1.0
+    },
+    {
+     "days": 56,
+     "pass_T1": 0.0,
+     "pass_hedged_only": 0.0,
+     "pass_unhedged_lb": 0.0,
+     "kill": 1.0
+    }
+   ]
+  },
+  {
+   "world": "redteam-fixed",
+   "half_c": 1,
+   "delta_c": 4,
+   "trades_per_day": 642.9,
+   "true_net_edge_c": 0.58,
+   "hedged_mean_c": 0.56,
+   "unhedged_mean_c": 0.46,
+   "exante_gap_c": 4.65,
+   "sd_day_hedged_c": 1.29,
+   "sd_day_unhedged_c": 2.98,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.386,
+     "pass_hedged_only": 0.48825,
+     "pass_unhedged_lb": 0.147,
+     "kill": 0.31925
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.49825,
+     "pass_hedged_only": 0.619,
+     "pass_unhedged_lb": 0.18525,
+     "kill": 0.449
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.59325,
+     "pass_hedged_only": 0.732,
+     "pass_unhedged_lb": 0.19775,
+     "kill": 0.55475
+    },
+    {
+     "days": 42,
+     "pass_T1": 0.7265,
+     "pass_hedged_only": 0.8515,
+     "pass_unhedged_lb": 0.26625,
+     "kill": 0.71575
+    },
+    {
+     "days": 56,
+     "pass_T1": 0.8245,
+     "pass_hedged_only": 0.9305,
+     "pass_unhedged_lb": 0.32075,
+     "kill": 0.815
+    }
+   ]
+  },
+  {
+   "world": "redteam-fixed",
+   "half_c": 1,
+   "delta_c": 5,
+   "trades_per_day": 805.0,
+   "true_net_edge_c": 1.99,
+   "hedged_mean_c": 2.01,
+   "unhedged_mean_c": 2.21,
+   "exante_gap_c": 4.69,
+   "sd_day_hedged_c": 1.05,
+   "sd_day_unhedged_c": 2.69,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.99925,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.898,
+     "kill": 0.0
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.9995,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.97875,
+     "kill": 0.0
+    },
+    {
+     "days": 28,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.9965,
+     "kill": 0.0
+    },
+    {
+     "days": 42,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 56,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    }
+   ]
+  },
+  {
+   "world": "redteam-fixed",
+   "half_c": 1,
+   "delta_c": 6,
+   "trades_per_day": 3611.8,
+   "true_net_edge_c": 4.29,
+   "hedged_mean_c": 4.3,
+   "unhedged_mean_c": 4.32,
+   "exante_gap_c": 4.57,
+   "sd_day_hedged_c": 0.22,
+   "sd_day_unhedged_c": 0.64,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 21,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 28,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 42,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 56,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    }
+   ]
+  },
+  {
+   "world": "redteam-fixed",
+   "half_c": 2,
+   "delta_c": 4,
+   "trades_per_day": 605.2,
+   "true_net_edge_c": -0.33,
+   "hedged_mean_c": -0.35,
+   "unhedged_mean_c": -0.22,
+   "exante_gap_c": 4.29,
+   "sd_day_hedged_c": 1.34,
+   "sd_day_unhedged_c": 3.3,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.00275,
+     "pass_hedged_only": 0.004,
+     "pass_unhedged_lb": 0.0325,
+     "kill": 0.987
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.001,
+     "pass_hedged_only": 0.00175,
+     "pass_unhedged_lb": 0.0295,
+     "kill": 0.999
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.00075,
+     "pass_hedged_only": 0.001,
+     "pass_unhedged_lb": 0.026,
+     "kill": 1.0
+    },
+    {
+     "days": 42,
+     "pass_T1": 0.0005,
+     "pass_hedged_only": 0.001,
+     "pass_unhedged_lb": 0.0165,
+     "kill": 1.0
+    },
+    {
+     "days": 56,
+     "pass_T1": 0.0,
+     "pass_hedged_only": 0.00025,
+     "pass_unhedged_lb": 0.0175,
+     "kill": 1.0
+    }
+   ]
+  },
+  {
+   "world": "redteam-fixed",
+   "half_c": 2,
+   "delta_c": 5,
+   "trades_per_day": 774.8,
+   "true_net_edge_c": 1.11,
+   "hedged_mean_c": 1.09,
+   "unhedged_mean_c": 1.19,
+   "exante_gap_c": 4.18,
+   "sd_day_hedged_c": 1.17,
+   "sd_day_unhedged_c": 2.54,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.882,
+     "pass_hedged_only": 0.908,
+     "pass_unhedged_lb": 0.52275,
+     "kill": 0.01375
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.9465,
+     "pass_hedged_only": 0.95525,
+     "pass_unhedged_lb": 0.68175,
+     "kill": 0.012
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.978,
+     "pass_hedged_only": 0.98325,
+     "pass_unhedged_lb": 0.7795,
+     "kill": 0.0145
+    },
+    {
+     "days": 42,
+     "pass_T1": 0.999,
+     "pass_hedged_only": 0.99925,
+     "pass_unhedged_lb": 0.9125,
+     "kill": 0.00775
+    },
+    {
+     "days": 56,
+     "pass_T1": 0.99925,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.96625,
+     "kill": 0.0065
+    }
+   ]
+  },
+  {
+   "world": "redteam-fixed",
+   "half_c": 2,
+   "delta_c": 6,
+   "trades_per_day": 3591.5,
+   "true_net_edge_c": 3.38,
+   "hedged_mean_c": 3.39,
+   "unhedged_mean_c": 3.38,
+   "exante_gap_c": 3.69,
+   "sd_day_hedged_c": 0.22,
+   "sd_day_unhedged_c": 0.6,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 21,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 28,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 42,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 56,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    }
+   ]
+  },
+  {
+   "world": "redteam-fixed",
+   "half_c": 2,
+   "delta_c": 8,
+   "trades_per_day": 3593.9,
+   "true_net_edge_c": 5.3,
+   "hedged_mean_c": 5.28,
+   "unhedged_mean_c": 5.25,
+   "exante_gap_c": 5.43,
+   "sd_day_hedged_c": 0.21,
+   "sd_day_unhedged_c": 0.64,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 21,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 28,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 42,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 56,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    }
+   ]
+  },
+  {
+   "world": "redteam-fixed",
+   "half_c": 3,
+   "delta_c": 6,
+   "trades_per_day": 3575.6,
+   "true_net_edge_c": 2.47,
+   "hedged_mean_c": 2.46,
+   "unhedged_mean_c": 2.48,
+   "exante_gap_c": 2.84,
+   "sd_day_hedged_c": 0.21,
+   "sd_day_unhedged_c": 0.54,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 21,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 28,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 42,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 56,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    }
+   ]
+  },
+  {
+   "world": "redteam-fixed",
+   "half_c": 3,
+   "delta_c": 8,
+   "trades_per_day": 3581.5,
+   "true_net_edge_c": 4.38,
+   "hedged_mean_c": 4.38,
+   "unhedged_mean_c": 4.41,
+   "exante_gap_c": 4.55,
+   "sd_day_hedged_c": 0.19,
+   "sd_day_unhedged_c": 0.62,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 21,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 28,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 42,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 56,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    }
+   ]
+  },
+  {
+   "world": "redteam-fixed",
+   "variant": "fee rounded up to 1c",
+   "half_c": 1,
+   "delta_c": 5,
+   "trades_per_day": 779.1,
+   "true_net_edge_c": 1.55,
+   "hedged_mean_c": 1.56,
+   "unhedged_mean_c": 1.44,
+   "exante_gap_c": 4.42,
+   "sd_day_hedged_c": 1.07,
+   "sd_day_unhedged_c": 2.72,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.97425,
+     "pass_hedged_only": 0.99575,
+     "pass_unhedged_lb": 0.61175,
+     "kill": 0.0
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.99325,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.7745,
+     "kill": 0.0
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.99725,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.874,
+     "kill": 0.0
+    },
+    {
+     "days": 42,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.95225,
+     "kill": 0.0
+    },
+    {
+     "days": 56,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.9885,
+     "kill": 0.0
+    }
+   ]
+  },
+  {
+   "world": "redteam-fixed",
+   "variant": "stale Kalshi quotes 3 s, delta 0",
+   "half_c": 1,
+   "delta_c": 0,
+   "trades_per_day": 540.7,
+   "true_net_edge_c": -1.69,
+   "hedged_mean_c": -1.7,
+   "unhedged_mean_c": -1.79,
+   "exante_gap_c": 4.65,
+   "sd_day_hedged_c": 1.77,
+   "sd_day_unhedged_c": 3.1,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.0,
+     "pass_hedged_only": 0.0,
+     "pass_unhedged_lb": 0.00025,
+     "kill": 0.999
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.0,
+     "pass_hedged_only": 0.0,
+     "pass_unhedged_lb": 0.0,
+     "kill": 1.0
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.0,
+     "pass_hedged_only": 0.0,
+     "pass_unhedged_lb": 0.0,
+     "kill": 1.0
+    },
+    {
+     "days": 42,
+     "pass_T1": 0.0,
+     "pass_hedged_only": 0.0,
+     "pass_unhedged_lb": 0.0,
+     "kill": 1.0
+    },
+    {
+     "days": 56,
+     "pass_T1": 0.0,
+     "pass_hedged_only": 0.0,
+     "pass_unhedged_lb": 0.0,
+     "kill": 1.0
+    }
+   ]
+  },
+  {
+   "world": "redteam-fixed",
+   "variant": "BTC only",
+   "half_c": 1,
+   "delta_c": 5,
+   "trades_per_day": 429.5,
+   "true_net_edge_c": 1.95,
+   "hedged_mean_c": 1.94,
+   "unhedged_mean_c": 2.0,
+   "exante_gap_c": 4.77,
+   "sd_day_hedged_c": 1.24,
+   "sd_day_unhedged_c": 3.59,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.98175,
+     "pass_hedged_only": 0.99575,
+     "pass_unhedged_lb": 0.65975,
+     "kill": 0.00025
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.99525,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.8165,
+     "kill": 0.0
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.99875,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.898,
+     "kill": 0.0
+    },
+    {
+     "days": 42,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.97225,
+     "kill": 0.0
+    },
+    {
+     "days": 56,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.9925,
+     "kill": 0.0
+    }
+   ]
+  }
+ ],
+ "params": {
+  "VOL0": 0.5,
+  "RHO": 0.8,
+  "NOISE": 0.005,
+  "JUMP_LAM": 6.0,
+  "JUMP_SD": 0.006,
+  "INTRA_SD": 0.3,
+  "SEASON": [
+   0.797,
+   0.747,
+   0.697,
+   0.697,
+   0.697,
+   0.747,
+   0.797,
+   0.846,
+   0.896,
+   0.896,
+   0.946,
+   0.996,
+   1.145,
+   1.593,
+   1.693,
+   1.494,
+   1.295,
+   1.195,
+   1.095,
+   1.046,
+   0.996,
+   0.946,
+   0.896,
+   0.846
+  ],
+  "basis_sd": 0.0002
+ },
+ "power_taper": [
+  {
+   "world": "design-rough",
+   "taper": true,
+   "half_c": 1,
+   "delta_c": 4,
+   "trades_per_day": 501.7,
+   "true_net_edge_c": 0.73,
+   "hedged_mean_c": 0.76,
+   "unhedged_mean_c": 0.83,
+   "exante_gap_c": 3.75,
+   "sd_day_hedged_c": 1.77,
+   "sd_day_unhedged_c": 3.86,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.4135,
+     "pass_hedged_only": 0.4755,
+     "pass_unhedged_lb": 0.18925,
+     "kill": 0.068
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.52375,
+     "pass_hedged_only": 0.58825,
+     "pass_unhedged_lb": 0.2445,
+     "kill": 0.09475
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.63075,
+     "pass_hedged_only": 0.69375,
+     "pass_unhedged_lb": 0.2775,
+     "kill": 0.124
+    },
+    {
+     "days": 42,
+     "pass_T1": 0.779,
+     "pass_hedged_only": 0.8315,
+     "pass_unhedged_lb": 0.38075,
+     "kill": 0.1765
+    },
+    {
+     "days": 56,
+     "pass_T1": 0.8715,
+     "pass_hedged_only": 0.90625,
+     "pass_unhedged_lb": 0.46875,
+     "kill": 0.225
+    }
+   ]
+  },
+  {
+   "world": "design-rough",
+   "taper": true,
+   "half_c": 1,
+   "delta_c": 5,
+   "trades_per_day": 540.6,
+   "true_net_edge_c": 1.85,
+   "hedged_mean_c": 1.79,
+   "unhedged_mean_c": 1.88,
+   "exante_gap_c": 3.97,
+   "sd_day_hedged_c": 1.71,
+   "sd_day_unhedged_c": 4.15,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.886,
+     "pass_hedged_only": 0.9205,
+     "pass_unhedged_lb": 0.48725,
+     "kill": 0.0
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.9655,
+     "pass_hedged_only": 0.98275,
+     "pass_unhedged_lb": 0.6415,
+     "kill": 0.0
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.98925,
+     "pass_hedged_only": 0.99675,
+     "pass_unhedged_lb": 0.75775,
+     "kill": 0.0
+    },
+    {
+     "days": 42,
+     "pass_T1": 0.99825,
+     "pass_hedged_only": 0.99975,
+     "pass_unhedged_lb": 0.891,
+     "kill": 0.0
+    },
+    {
+     "days": 56,
+     "pass_T1": 0.99975,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.95475,
+     "kill": 0.0
+    }
+   ]
+  },
+  {
+   "world": "design-rough",
+   "taper": true,
+   "half_c": 1,
+   "delta_c": 6,
+   "trades_per_day": 560.1,
+   "true_net_edge_c": 2.7,
+   "hedged_mean_c": 2.64,
+   "unhedged_mean_c": 2.72,
+   "exante_gap_c": 4.5,
+   "sd_day_hedged_c": 1.82,
+   "sd_day_unhedged_c": 4.63,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.9665,
+     "pass_hedged_only": 0.9815,
+     "pass_unhedged_lb": 0.681,
+     "kill": 0.0
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.994,
+     "pass_hedged_only": 0.99775,
+     "pass_unhedged_lb": 0.83925,
+     "kill": 0.0
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.9985,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.92275,
+     "kill": 0.0
+    },
+    {
+     "days": 42,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.98475,
+     "kill": 0.0
+    },
+    {
+     "days": 56,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.9965,
+     "kill": 0.0
+    }
+   ]
+  },
+  {
+   "world": "redteam-fixed",
+   "taper": true,
+   "half_c": 1,
+   "delta_c": 4,
+   "trades_per_day": 517.7,
+   "true_net_edge_c": -0.11,
+   "hedged_mean_c": -0.09,
+   "unhedged_mean_c": -0.29,
+   "exante_gap_c": 5.08,
+   "sd_day_hedged_c": 1.67,
+   "sd_day_unhedged_c": 3.56,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.0205,
+     "pass_hedged_only": 0.03075,
+     "pass_unhedged_lb": 0.02675,
+     "kill": 0.7685
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.01275,
+     "pass_hedged_only": 0.02575,
+     "pass_unhedged_lb": 0.02375,
+     "kill": 0.89
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.01225,
+     "pass_hedged_only": 0.025,
+     "pass_unhedged_lb": 0.01875,
+     "kill": 0.9565
+    },
+    {
+     "days": 42,
+     "pass_T1": 0.01075,
+     "pass_hedged_only": 0.021,
+     "pass_unhedged_lb": 0.02,
+     "kill": 0.9915
+    },
+    {
+     "days": 56,
+     "pass_T1": 0.007,
+     "pass_hedged_only": 0.01725,
+     "pass_unhedged_lb": 0.015,
+     "kill": 0.99925
+    }
+   ]
+  },
+  {
+   "world": "redteam-fixed",
+   "taper": true,
+   "half_c": 1,
+   "delta_c": 5,
+   "trades_per_day": 548.5,
+   "true_net_edge_c": 0.81,
+   "hedged_mean_c": 0.82,
+   "unhedged_mean_c": 0.57,
+   "exante_gap_c": 5.11,
+   "sd_day_hedged_c": 1.62,
+   "sd_day_unhedged_c": 3.9,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.438,
+     "pass_hedged_only": 0.56675,
+     "pass_unhedged_lb": 0.126,
+     "kill": 0.08425
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.55175,
+     "pass_hedged_only": 0.70625,
+     "pass_unhedged_lb": 0.14775,
+     "kill": 0.117
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.64325,
+     "pass_hedged_only": 0.803,
+     "pass_unhedged_lb": 0.1695,
+     "kill": 0.13125
+    },
+    {
+     "days": 42,
+     "pass_T1": 0.772,
+     "pass_hedged_only": 0.9185,
+     "pass_unhedged_lb": 0.23175,
+     "kill": 0.16225
+    },
+    {
+     "days": 56,
+     "pass_T1": 0.82775,
+     "pass_hedged_only": 0.97025,
+     "pass_unhedged_lb": 0.273,
+     "kill": 0.19
+    }
+   ]
+  },
+  {
+   "world": "redteam-fixed",
+   "taper": true,
+   "half_c": 1,
+   "delta_c": 6,
+   "trades_per_day": 552.4,
+   "true_net_edge_c": 1.68,
+   "hedged_mean_c": 1.69,
+   "unhedged_mean_c": 1.85,
+   "exante_gap_c": 5.47,
+   "sd_day_hedged_c": 1.69,
+   "sd_day_unhedged_c": 4.26,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.89925,
+     "pass_hedged_only": 0.9375,
+     "pass_unhedged_lb": 0.4875,
+     "kill": 0.0015
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.97125,
+     "pass_hedged_only": 0.99025,
+     "pass_unhedged_lb": 0.64,
+     "kill": 0.0
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.98875,
+     "pass_hedged_only": 0.9975,
+     "pass_unhedged_lb": 0.75,
+     "kill": 0.00025
+    },
+    {
+     "days": 42,
+     "pass_T1": 0.9975,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.88075,
+     "kill": 0.0
+    },
+    {
+     "days": 56,
+     "pass_T1": 0.9995,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.9595,
+     "kill": 0.0
+    }
+   ]
+  },
+  {
+   "world": "redteam-fixed",
+   "taper": true,
+   "half_c": 1,
+   "delta_c": 8,
+   "trades_per_day": 558.4,
+   "true_net_edge_c": 3.42,
+   "hedged_mean_c": 3.37,
+   "unhedged_mean_c": 3.47,
+   "exante_gap_c": 6.37,
+   "sd_day_hedged_c": 1.75,
+   "sd_day_unhedged_c": 3.98,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.99925,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.9255,
+     "kill": 0.0
+    },
+    {
+     "days": 21,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.98925,
+     "kill": 0.0
+    },
+    {
+     "days": 28,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.9975,
+     "kill": 0.0
+    },
+    {
+     "days": 42,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 56,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    }
+   ]
+  },
+  {
+   "world": "redteam-fixed",
+   "taper": true,
+   "half_c": 2,
+   "delta_c": 5,
+   "trades_per_day": 501.2,
+   "true_net_edge_c": -0.15,
+   "hedged_mean_c": -0.27,
+   "unhedged_mean_c": -0.29,
+   "exante_gap_c": 4.87,
+   "sd_day_hedged_c": 1.78,
+   "sd_day_unhedged_c": 3.96,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.0105,
+     "pass_hedged_only": 0.01675,
+     "pass_unhedged_lb": 0.0275,
+     "kill": 0.85375
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.0095,
+     "pass_hedged_only": 0.01575,
+     "pass_unhedged_lb": 0.02575,
+     "kill": 0.9595
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.00525,
+     "pass_hedged_only": 0.01125,
+     "pass_unhedged_lb": 0.023,
+     "kill": 0.99
+    },
+    {
+     "days": 42,
+     "pass_T1": 0.003,
+     "pass_hedged_only": 0.006,
+     "pass_unhedged_lb": 0.01575,
+     "kill": 0.99975
+    },
+    {
+     "days": 56,
+     "pass_T1": 0.00125,
+     "pass_hedged_only": 0.002,
+     "pass_unhedged_lb": 0.0145,
+     "kill": 1.0
+    }
+   ]
+  },
+  {
+   "world": "redteam-fixed",
+   "taper": true,
+   "half_c": 2,
+   "delta_c": 6,
+   "trades_per_day": 498.5,
+   "true_net_edge_c": 0.71,
+   "hedged_mean_c": 0.8,
+   "unhedged_mean_c": 0.82,
+   "exante_gap_c": 5.12,
+   "sd_day_hedged_c": 1.86,
+   "sd_day_unhedged_c": 4.23,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.38525,
+     "pass_hedged_only": 0.46575,
+     "pass_unhedged_lb": 0.1735,
+     "kill": 0.0775
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.5105,
+     "pass_hedged_only": 0.595,
+     "pass_unhedged_lb": 0.22975,
+     "kill": 0.10725
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.60825,
+     "pass_hedged_only": 0.69475,
+     "pass_unhedged_lb": 0.256,
+     "kill": 0.11325
+    },
+    {
+     "days": 42,
+     "pass_T1": 0.75125,
+     "pass_hedged_only": 0.827,
+     "pass_unhedged_lb": 0.334,
+     "kill": 0.1565
+    },
+    {
+     "days": 56,
+     "pass_T1": 0.849,
+     "pass_hedged_only": 0.91125,
+     "pass_unhedged_lb": 0.408,
+     "kill": 0.18475
+    }
+   ]
+  },
+  {
+   "world": "redteam-fixed",
+   "taper": true,
+   "half_c": 2,
+   "delta_c": 8,
+   "trades_per_day": 525.6,
+   "true_net_edge_c": 2.59,
+   "hedged_mean_c": 2.56,
+   "unhedged_mean_c": 2.65,
+   "exante_gap_c": 5.89,
+   "sd_day_hedged_c": 1.78,
+   "sd_day_unhedged_c": 4.11,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 0.98625,
+     "pass_hedged_only": 0.99425,
+     "pass_unhedged_lb": 0.75375,
+     "kill": 0.0
+    },
+    {
+     "days": 21,
+     "pass_T1": 0.998,
+     "pass_hedged_only": 0.9995,
+     "pass_unhedged_lb": 0.886,
+     "kill": 0.0
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.99975,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.94825,
+     "kill": 0.0
+    },
+    {
+     "days": 42,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.99075,
+     "kill": 0.0
+    },
+    {
+     "days": 56,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.99875,
+     "kill": 0.0
+    }
+   ]
+  },
+  {
+   "world": "redteam-fixed",
+   "taper": true,
+   "half_c": 2,
+   "delta_c": 10,
+   "trades_per_day": 544.6,
+   "true_net_edge_c": 4.44,
+   "hedged_mean_c": 4.45,
+   "unhedged_mean_c": 4.33,
+   "exante_gap_c": 6.85,
+   "sd_day_hedged_c": 1.89,
+   "sd_day_unhedged_c": 4.29,
+   "curve": [
+    {
+     "days": 14,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.962,
+     "kill": 0.0
+    },
+    {
+     "days": 21,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.99525,
+     "kill": 0.0
+    },
+    {
+     "days": 28,
+     "pass_T1": 0.99975,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 0.99925,
+     "kill": 0.0
+    },
+    {
+     "days": 42,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    },
+    {
+     "days": 56,
+     "pass_T1": 1.0,
+     "pass_hedged_only": 1.0,
+     "pass_unhedged_lb": 1.0,
+     "kill": 0.0
+    }
+   ]
+  }
+ ]
+}

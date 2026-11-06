@@ -2,6 +2,8 @@
 
 Written 2026-11-06, while stage 2 is still recording. **Nothing here used real stage 2 data.** No snapshot, price, quote, outcome or result from stage 2 was opened. The power numbers come from `power_sim.py` on synthetic data only, and the only live data touched is market *metadata* (series, settlement hours, strike counts) printed by `discover_series.py` in CI.
 
+> **Red-team review (2026-11-06): the power figures below are superseded.** See [`REVIEW.md`](REVIEW.md). The constant-offset mispricing in `power_sim.py` creates near-riskless trades in the tails, and the fair value is closer to the truth than it can be at hourly horizons. With both corrected, the test decides reliably in 28 days at a mispricing of about 6¢ (1¢ half spread) or 7 to 8¢ (2¢), not 4¢. The structure of the test (outcome-scored, day clusters, hedge as a control variate) holds, with a fix to where the hedge starts.
+
 The pre-registration that follows from this is [`PREREGISTRATION_stage3_DRAFT.md`](PREREGISTRATION_stage3_DRAFT.md). **It is a draft. Mattias must approve it before anything starts.**
 
 ## In short
