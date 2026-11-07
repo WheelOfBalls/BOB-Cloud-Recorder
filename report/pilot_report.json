@@ -1,9 +1,9 @@
 {
- "generated_utc": "2026-11-07T16:18:03+00:00",
- "snapshots": 409,
+ "generated_utc": "2026-11-07T21:58:03+00:00",
+ "snapshots": 476,
  "unreadable": 0,
  "modes": {
-  "pilot": 409
+  "pilot": 476
  },
  "days": {
   "2026-11-06": {
@@ -14,52 +14,52 @@
    "both": 216
   },
   "2026-11-07": {
-   "slots": 195,
-   "recorded": 193,
-   "btc": 193,
-   "eth": 193,
-   "both": 193
+   "slots": 263,
+   "recorded": 260,
+   "btc": 260,
+   "eth": 260,
+   "both": 260
   }
  },
  "timing": {
-  "late": "0.05 / 0.05 / 0.05 / 0.06",
-  "duration": "3.33 / 6.12 / 8.70 / 9.61",
-  "books": "8.00 / 21.00 / 40.00 / 44.00",
-  "kb": "29.42 / 30.74 / 33.43 / 33.87",
+  "late": "0.04 / 0.05 / 0.05 / 0.06",
+  "duration": "3.21 / 6.01 / 8.66 / 9.61",
+  "books": "7.00 / 20.00 / 38.00 / 44.00",
+  "kb": "29.43 / 30.57 / 33.07 / 33.87",
   "books_truncated": 0
  },
  "events_BTC": {
-  "hourly": 35,
-  "hours": 35,
+  "hourly": 39,
+  "hours": 40,
   "missing": 1,
   "missing_not_daily": []
  },
  "events_ETH": {
-  "hourly": 35,
-  "hours": 35,
+  "hourly": 39,
+  "hours": 40,
   "missing": 1,
   "missing_not_daily": []
  },
  "spreads": {
-  "1": 2492,
-  "2": 405,
-  "3": 185,
-  "4": 89,
-  "5": 51,
-  "6-10": 70,
-  ">10": 16
+  "1": 2630,
+  "2": 425,
+  "3": 193,
+  "4": 104,
+  "5": 57,
+  "6-10": 85,
+  ">10": 26
  },
  "rows": {
-  "BTC": 1867,
-  "ETH": 1441
+  "BTC": 1986,
+  "ETH": 1534
  },
  "index_BTC": {
-  "minutes": 2116,
-  "ok": 2066
+  "minutes": 2456,
+  "ok": 2405
  },
  "index_ETH": {
-  "minutes": 2116,
-  "ok": 2066
+  "minutes": 2456,
+  "ok": 2405
  },
  "errors": {}
 }
