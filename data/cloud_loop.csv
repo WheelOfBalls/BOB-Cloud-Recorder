@@ -419,3 +419,5 @@ slot,2026-11-07T15:52:30+00:00,42364782122,workflow_dispatch,0.0,3.0,rc=0 pushed
 slot,2026-11-07T15:57:30+00:00,42364782122,workflow_dispatch,0.0,2.4,rc=0 pushed
 slot,2026-11-07T16:02:30+00:00,42364782122,workflow_dispatch,0.0,4.1,rc=0 pushed
 slot,2026-11-07T16:07:30+00:00,42364782122,workflow_dispatch,0.0,4.5,rc=0 pushed
+slot,2026-11-07T16:12:30+00:00,42364782122,workflow_dispatch,0.0,4.2,rc=0 pushed
+run_end,2026-11-07T16:18:00+00:00,42364782122,workflow_dispatch,,,pilot
