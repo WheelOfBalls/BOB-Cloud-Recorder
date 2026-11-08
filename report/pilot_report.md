@@ -1,6 +1,6 @@
 # Stage 3 counts-only report
 
-Generated 2026-11-08T05:59:47+00:00. Data: `_data/data`. Counts, shares and timings only; no prices, gaps, p_opt or outcomes.
+Generated 2026-11-08T06:00:05+00:00. Data: `_data/data`. Counts, shares and timings only; no prices, gaps, p_opt or outcomes.
 
 Snapshots: 571 (2026-11-06 05:02 to 2026-11-08 05:57 UTC), unreadable 0, modes {'pilot': 571}.
 
@@ -59,7 +59,7 @@ Valid snapshot x hourly market with a two-sided quote, mid in [0.06, 0.94] and 2
 ## Errors and runs
 
 - Request errors by endpoint: none
-- Runs started: 12; slot attempts 571; non-zero exit 0; failed pushes 0
+- Runs started: 13; slot attempts 571; non-zero exit 0; failed pushes 0
 - crash_log bytes: 0; hang_log bytes: 0
 - Series fee fields seen (series, frequency, fee_type, fee_multiplier): [('KXBTCD', 'hourly', 'quadratic', '1'), ('KXETHD', 'hourly', 'quadratic', '1')]
 
