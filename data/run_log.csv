@@ -1324,3 +1324,4 @@
 2026-11-10T09:43:02.046018+00:00,0,318,318,45,0.06,14.6,3,eribit.com/api/v2/public/get_index_price: HTTP Error 503: Service Unavailable | i/v2/public/get_book_summary_by_currency: HTTP Error 503: Service Unavailable | eribit.com/api/v2/public/get_index_price: HTTP Error 503: Service Unavailable
 2026-11-10T09:48:02.047234+00:00,258,318,318,43,0.10,9.0,0,
 2026-11-10T09:53:02.048184+00:00,258,318,318,42,0.06,8.7,0,
+2026-11-10T09:58:02.063985+00:00,258,318,318,44,0.08,9.2,0,
