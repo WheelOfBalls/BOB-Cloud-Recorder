@@ -1322,3 +1322,4 @@
 2026-11-10T09:33:02.047609+00:00,0,318,318,45,0.05,14.1,3,eribit.com/api/v2/public/get_index_price: HTTP Error 404: Not Found | i/v2/public/get_book_summary_by_currency: HTTP Error 404: Not Found | eribit.com/api/v2/public/get_index_price: HTTP Error 404: Not Found
 2026-11-10T09:38:02.045740+00:00,0,318,318,44,0.10,14.0,3,eribit.com/api/v2/public/get_index_price: HTTP Error 503: Service Unavailable | i/v2/public/get_book_summary_by_currency: HTTP Error 503: Service Unavailable | eribit.com/api/v2/public/get_index_price: HTTP Error 503: Service Unavailable
 2026-11-10T09:43:02.046018+00:00,0,318,318,45,0.06,14.6,3,eribit.com/api/v2/public/get_index_price: HTTP Error 503: Service Unavailable | i/v2/public/get_book_summary_by_currency: HTTP Error 503: Service Unavailable | eribit.com/api/v2/public/get_index_price: HTTP Error 503: Service Unavailable
+2026-11-10T09:48:02.047234+00:00,258,318,318,43,0.10,9.0,0,
