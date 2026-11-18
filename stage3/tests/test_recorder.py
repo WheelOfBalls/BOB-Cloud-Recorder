@@ -188,6 +188,17 @@ class TestLoop(unittest.TestCase):
         self.assertEqual(u, ts(2026, 11, 19, 19, 1))
         self.assertEqual(cl.mode_at(u, self.W), "live")
 
+    def test_handover_leaves_the_next_slot_to_the_successor(self):
+        ts = lambda *a: dt.datetime(*a, tzinfo=UTC).timestamp()
+        deadline = ts(2026, 11, 21, 12, 0, 50)
+        nxt = ts(2026, 11, 21, 11, 57, 30)          # declined: nxt + 200 s is past the deadline
+        stop = cl.poll_stop(nxt, self.W["end"], deadline)
+        self.assertEqual(stop, nxt - cl.HANDOVER_S)
+        self.assertLess(stop, nxt)                  # the run is over before the slot it left to its successor
+        # at the window's end the poll runs on to the end, so the last hourly close is covered
+        end = self.W["end"]
+        self.assertEqual(cl.poll_stop(end + 150, end, end + 3600), end)
+
     def test_files_match(self):
         w = cl.windows()
         self.assertEqual(w["start"], self.W["start"])

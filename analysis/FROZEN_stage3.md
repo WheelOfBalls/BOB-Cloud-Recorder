@@ -4,11 +4,11 @@ Frozen 2026-11-06, before the live recording starts (2026-11-20 00:00 UTC), as t
 
 | File | sha256 |
 |---|---|
-| `analysis/analyze_stage3.py` | `3e34e7009e289a67a4340440310f1e3b22f02863d95369e4dd52926bd7ecff58` (deviation 1; was `d42d5a91…d736`) |
+| `analysis/analyze_stage3.py` | `50aa2f8f1973877699a945df67682097223191cad5cce045fdf6b7d258da3f68` (2026-11-18, deviation 2 and the memory fix; `3e34e700…ff58` after deviation 1; `d42d5a91…d736` as frozen) |
 | `analysis/analyze_stage2.py` (fitter, imported) | `3e8dd8fa701105a04a435f9e7a8d4a62eb96719b72f7767fe9b4ce74701dbfe5` (was `c0b3dca6…e379`; stage 2 change of 2026-11-18, see below) |
 | `analysis/pull_after_stage3.py` | `8d223d432dde006bea12bc33da5dbcad89d664be4d076573c8d9d285870e6254` (was `13f3af0c…11bf`, see below) |
 | `analysis/pull_after.py` (HTTP helper, imported) | `cddb55ce07059730c9b96c86702c7db3b058824552338175a4472868c381d29e` (was `3c33715a…5f28`; changed by PR #16 on 2026-11-06 and not updated here until 2026-11-18) |
-| `docs/stage3/PREREGISTRATION_stage3.md` (for reference) | `a258ac4639cf776c1fb1784945d2f288d670548ab47ea67acd287db115e7427a` with deviation 1 logged; the text as frozen was `a62576a8…c515`, and everything above its deviations log is unchanged |
+| `docs/stage3/PREREGISTRATION_stage3.md` (for reference) | `899b5bb5843713eb7edd8213dff3523a2718d7255d5fc0dae8fcc79ac8d7c0a8` with deviations 1 and 2 logged (`a258ac46…427a` with deviation 1 only); the text as frozen was `a62576a8…c515`, and everything above its deviations log is unchanged |
 
 The pre-registration says the analysis hash is "recorded here", meaning in the pre-registration itself. That file is frozen and was not edited, so the hashes live in this file instead. If Mattias wants them in the pre-registration too, the place is its deviations log.
 
@@ -19,3 +19,5 @@ If the counts-only pilot shows a format problem that needs a code change before 
 **Deviation 1 (2026-11-06, about 06:51 UTC, before any live data).** `analyze_stage3.py` no longer drops rows by the row-sync rule; it flags them and reports T1 with the rule applied as a reference figure. Approved by the coordinator under Mattias's delegation; Mattias can revert it before 2026-11-20 00:00 UTC. The reasons are in the pre-registration's deviations log and in `docs/stage3/REVIEW_code.md` finding 1. Only the pre-registration's deviations log was edited; its text above that log is byte-for-byte the frozen one.
 
 **Correction and change on 2026-11-18 (review in `docs/REVIEW.md`, findings 1, 3 and 10).** The `pull_after.py` line above was stale: PR #16 changed that file on 2026-11-06 (the stage 2 settlement fallback) without updating this table. Separately, `analyze_stage2.py` changed on 2026-11-18 for stage 2's deviation 6 and a trade-tape guard (`analysis/NOTES.md`, last section). Stage 3 imports only its fitter, `load_tape` and small helpers; none of the fitter functions changed, and `load_tape` returns the same tape as before. The stage 3 tests pass unchanged. `tests/test_frozen.py` now recomputes every hash in this table and in `FROZEN_stage2.md`, so a change without an update here fails CI.
+
+**Deviation 2 and the memory fix (2026-11-18, before any live data).** See the pre-registration's deviations log. `load_snapshots` now works out each snapshot's rows as it reads it and drops the option chains, market lists, books and brackets, because 28 days of full snapshots would have taken about 16 GB (`docs/REVIEW.md`, finding 2). Checked on synthetic fixtures: two 5-day worlds (a 6¢ edge and none) give the same `stage3_results.json` as the previous script apart from the new count keys and the two script hashes, and on the 571 pilot snapshots the counts-only `preflight` and `coverage` output is byte-identical. Peak memory for `preflight` on the pilot went from 1166 MB to 37 MB. A test checks that the compacted and full snapshots give the same analysis.
