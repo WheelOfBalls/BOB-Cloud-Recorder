@@ -2,7 +2,7 @@
 
 Written 2026-11-16 by Claude, four days before the live window (2026-11-20 00:00 to 2026-12-18 00:00 UTC). Research only: no account, no orders, no money.
 
-**Verdict: the recorder is ready for the live window. Nothing in the pilot requires a code or rule change.** Four items still need doing before or at the start (listed at the end); one of them is a decision only Mattias can make.
+**Verdict: the recorder is ready for the live window. Nothing in the pilot requires a code or rule change.** Four pre-start items are listed at the end; the two decisions among them are settled (updated 2026-11-18), and the remaining two are checks.
 
 ## What was looked at, and what was not
 
@@ -52,8 +52,8 @@ The power statement is written at a 1¢ **half** spread (a 2¢ spread): a mispri
 
 ## Before and at the start
 
-1. **Decision for Mattias, by 2026-11-20 00:00 UTC: keep or revert stage 3 deviation 1** (PR #17: the row-sync rule flags rows instead of dropping them, because the rule as frozen biased hedged P&L up by about 1 to 2¢ at zero edge in synthetic tests). It was approved by the coordinator under delegation while Mattias was away. Recommendation: keep it. Reverting would put back a known bias as large as the 1¢ KILL margin.
-2. **Acknowledge the power change Mattias has not seen** (stated at the top of `PREREGISTRATION_stage3.md`): the reliable minimum detectable mispricing is about 6¢, not the 4¢ in the draft he approved. The gates are unchanged; this only changes what a KILL means (no edge of about 6¢ or more, rather than none of 4¢ or more).
+1. **Deviation 1: kept (settled).** PR #17 makes the row-sync rule flag rows instead of dropping them, because the rule as frozen biased hedged P&L up by about 1 to 2¢ at zero edge in synthetic tests. It was first approved by the coordinator under delegation; Mattias confirmed "Keep deviation 1" on 2026-11-18 03:06 UTC, so it is no longer revertible.
+2. **Power change: accepted (settled).** The reliable minimum detectable mispricing is about 6¢, not the 4¢ in the draft Mattias approved (stated at the top of `PREREGISTRATION_stage3.md`). Accepted on 2026-11-17 under Mattias's instruction to take the best option on every open question. The gates are unchanged; a KILL means no edge of about 6¢ or more.
 3. **Fee schedule re-check.** Checked 2026-11-16 against Kalshi's fee schedule PDF (kalshi.com/docs/kalshi-fee-schedule.pdf): still "Last updated and effective: July 7, 2026"; taker fee round up(M × 0.07 × C × P × (1 − P)) with M = 1 by default; maker M = 0 by default; KXBTCD and KXETHD are not in the non-standard tables. This matches the frozen fee rule, so no deviation. The pre-registration asks for the check "before the first stage 3 snapshot", so it should be repeated once on 2026-11-19, and a change logged as a deviation before 00:00 UTC.
 4. **Check the first live hours on 2026-11-20** with `counts_report.py` on `stage3-data` (counts only; it prints no spreads on live data): snapshots from 00:02:30 UTC, both coins valid, minute polls present.
 
