@@ -177,6 +177,53 @@ class Merge(unittest.TestCase):
             cov = A.event_coverage(pick, g, {"KXBTCD-26NOV0717": close})["KXBTCD-26NOV0717"]
             self.assertEqual((cov["possible"], cov["valid"], cov["qualifies"]), (360, n_valid, ok))
 
+    def test_coverage_counts_slots_before_the_event_is_listed(self):
+        # deviation 6: Kalshi lists a normal 5pm event about 25 h before close, so only the last 300 of the 360
+        # slots can list it. Every slot valid: qualifies under deviation 6, could not under the earlier reading.
+        close = A.iso_ts("2026-11-07T22:00:00Z")
+        ev = {"KXBTCD-26NOV0717": close}
+        for n_lost, ok in ((72, True), (73, False)):
+            ms = []
+            for i in range(360):
+                t = close - 30 * 3600 + 182 - 182 % 300 + 300 * i + (close % 300)
+                ms.append(meta(t, "local", i < 360 - n_lost, ev if i >= 60 else {}))   # the last n_lost slots are lost
+            g = A.Grid(ms); pick, _ = A.build_series(ms, g, "merged")
+            cov = A.event_coverage(pick, g, ev)["KXBTCD-26NOV0717"]
+            self.assertEqual((cov["valid"], cov["qualifies"]), (360 - n_lost, ok))
+            self.assertEqual((cov["valid_listed"], cov["qualifies_listed"]), (300 - n_lost, False))
+        # the earlier reading tolerated only 12 lost slots (one hour) for such an event
+        ms = [meta(close - 30 * 3600 + 182 - 182 % 300 + 300 * i + (close % 300), "local", i < 348, ev if i >= 60 else {}) for i in range(360)]
+        g = A.Grid(ms); pick, _ = A.build_series(ms, g, "merged")
+        cov = A.event_coverage(pick, g, ev)["KXBTCD-26NOV0717"]
+        self.assertEqual((cov["valid_listed"], cov["qualifies_listed"]), (288, True))
+
+
+class TapeGuard(unittest.TestCase):
+    def setUp(self):
+        self.d = tempfile.mkdtemp(); A.TAPE_STATS.clear()
+
+    def tearDown(self):
+        shutil.rmtree(self.d); A.TAPE_STATS.clear()
+
+    def write(self, ticker, trades):
+        with gzip.open(os.path.join(self.d, ticker + ".json.gz"), "wt") as f:
+            json.dump({"truncated": False, "trades": trades}, f)
+
+    def test_renamed_fields_stop_the_run(self):
+        self.write("E1-T1", [{"yes_price": 40, "count": 5, "created_time": "2026-11-06T10:00:00Z"}] * 3)
+        tape, _ = A.load_tape(self.d, "E1-T1")
+        self.assertEqual(tape, [])
+        self.assertIn("format has probably changed", A.tape_problem(10))
+
+    def test_no_tape_files_stop_the_run(self):
+        self.assertIsNone(A.load_tape(self.d, "E1-T1")[0])
+        self.assertIn("no trade tape file", A.tape_problem(10))
+
+    def test_good_tape_passes(self):
+        self.write("E1-T1", [{"yes_price_dollars": "0.4000", "count_fp": "5.00", "created_time": "2026-11-06T10:00:00Z"}])
+        self.assertEqual(len(A.load_tape(self.d, "E1-T1")[0]), 1)
+        self.assertIsNone(A.tape_problem(10))
+
 
 def row(**k):
     r = {"event": "E1", "ticker": "E1-T1", "t": T0, "t_q": T0 + 1.5, "h": 10.0, "bid": 0.40, "ask": 0.42, "mid": 0.41,
@@ -298,6 +345,19 @@ class Guards(unittest.TestCase):
         with mock.patch.object(A, "END_UTC", "2026-11-05T00:00:00+00:00"):
             rc, _ = run_cli(*self.args())
         self.assertIn("runs once", rc)
+
+    def test_refuses_without_a_readable_tape(self):
+        d = tempfile.mkdtemp()
+        try:
+            MF.make(d, days=1.6, cloud_start_h=0)            # the Nov 6 event qualifies, so there are rows
+            shutil.rmtree(f"{d}/trades"); os.makedirs(f"{d}/trades")
+            rc, _ = run_cli("run", "--local", f"{d}/local", "--cloud", f"{d}/cloud", "--settlements", f"{d}/settlements.json",
+                            "--trades", f"{d}/trades", "--out", f"{d}/out", "--end", f"{d}/end_utc.txt",
+                            "--now", "2026-11-17T00:00:00+00:00")
+            self.assertIn("no trade tape file", str(rc))
+            self.assertFalse(os.path.exists(f"{d}/out/stage2_results.json"))
+        finally:
+            shutil.rmtree(d)
 
     def test_coverage_mode_never_needs_outcomes(self):
         rc, out = run_cli("coverage", "--local", f"{self.d}/local", "--cloud", f"{self.d}/cloud", "--end", self.end)

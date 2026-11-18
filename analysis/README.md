@@ -23,7 +23,7 @@ python3 -I analysis/analyze_stage2.py run --local <BOB>/stage2/data --cloud ../s
     --settlements results/settlements.json --trades results/trades --out results
 ```
 
-Run `run` once. Its output (`results/stage2_results.txt` and `.json`) records the script's sha256.
+Run `run` once. Its output (`results/stage2_results.txt` and `.json`) records the script's sha256. Check it against `FROZEN_stage2.md` before reading anything else. `run` refuses, without writing a result, if the trade tape is missing or more than 1% of trades can't be parsed; fix the pull and run again. It also prints the merged test under the coverage reading used before deviation 6, for reference only.
 
 ## Tests
 

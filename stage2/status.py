@@ -199,7 +199,7 @@ def event_table(R, g, ev):
     out = []
     for name, close in sorted(ev.items(), key=lambda x: x[1]):
         ws = [i for i in range(g.slot(close - WINDOW_H * 3600), g.slot(close) + 1) if close - WINDOW_H * 3600 <= g.slot_t(i) < close]
-        good = sum(1 for i in ws if R["st"].get(i) == "valid" and name.split()[0] in R["pick"][i]["events"])
+        good = sum(1 for i in ws if R["st"].get(i) == "valid")  # deviation 6: a valid snapshot counts even before Kalshi lists the event
         future = sum(1 for i in ws if g.slot_t(i) > max(g.now, g.slot_t(g.last_done)) and (g.END is None or g.slot_t(i) < g.END))
         rec_slots = [i for i in ws if R["first"] <= i <= g.last_done]
         best = good + future; settled = close <= g.now
