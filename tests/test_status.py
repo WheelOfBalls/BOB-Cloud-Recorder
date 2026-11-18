@@ -41,6 +41,21 @@ class Base(unittest.TestCase):
         Ls, Cs = status.source_series(L, g), status.source_series(C, g)
         return g, Ls, Cs, status.merged_series(Ls, Cs, g)
 
+class ListingTime(Base):
+    def test_slots_before_the_event_is_listed_count(self):
+        # deviation 6: Kalshi lists a normal 5pm event about 25 h before close. The first 60 slots of the 30 h window
+        # list only the previous day's event; they still count. 72 lost slots (6 h) leave exactly 288.
+        H = "2026-11-06T16:00:00"
+        for k in range(360):
+            if 100 <= k < 172: continue
+            if k < 60: write_snapshot(self.L, slot_time(H, k), event="KXBTCD-26NOV0617", close="2026-11-06T22:00:00Z")
+            else: write_snapshot(self.L, slot_time(H, k))
+        src = status.load_source("local", self.L, os.path.join(self.tmp, "cl.json"))
+        g = status.Grid(src["S"], dt.datetime.fromisoformat("2026-11-07T23:00:00+00:00").timestamp(), None)
+        ev = {"KXBTCD-26NOV0717": dt.datetime.fromisoformat("2026-11-07T22:00:00+00:00").timestamp()}
+        (row,) = status.event_table(status.source_series(src, g), g, ev)
+        self.assertEqual((row["ws"], row["good"]), (360, 288)); self.assertTrue(row["qualifies"])
+
 class MergeRule(Base):
     def test_per_slot_choice(self):
         H = "2026-11-06T10:00:00"; s = lambda k: slot_time(H, k)

@@ -4,6 +4,8 @@ Scope: `analyze_stage2.py`, `pull_after.py`, `NOTES.md`, `tests/` and `docs/PRER
 
 The review experiments are in `analysis/review/` and can be rerun (`python3 analysis/review/fitnoise.py`, `power.py`, `daysd.py`).
 
+**Update 2026-11-18:** the script changed for deviation 6 and a trade-tape guard. The current hashes are in `FROZEN_stage2.md`; the line below is the 2026-11-06 freeze.
+
 **Frozen script after this review:** `analyze_stage2.py` sha256 `c0b3dca6c3b9a00364d2bc7b84ca0960bb346d8f28c32a55647d2907cc49e379` (main after PRs #5 and #6). PR #5 added the counts-only `preflight` mode. It was checked here too: it prints fitted-expiry, row and book counts per event, and no prices, gaps, p_opt, outcomes or trades, so it can't leak a result. The result file records the sha256 of the script that produced it. If the two differ, the run used a changed script and needs explaining.
 
 **Needs Mattias:** items marked **[decision]** would change a pre-registered rule, so they need a new deviation that only Mattias can approve. Nothing here was changed on his behalf.

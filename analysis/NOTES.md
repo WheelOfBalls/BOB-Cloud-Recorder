@@ -1,13 +1,13 @@
 # Stage 2 analysis: readings of the pre-registration
 
-`analyze_stage2.py` follows `docs/PREREGISTRATION_stage2.md` (a verbatim copy of `stage2/PREREGISTRATION.md` in the BOB folder, sha256 `2f81bc69…5944` since deviation 5; `e2dee34a…233e` before it), including deviations 3 to 5. Deviation 5 only fixes how S2 is read, so the code did not change. The pre-registration leaves the points below open. Each one lists the reading the script takes and the main alternative, so a reviewer can object before the test runs. None of these was chosen by looking at data: the script was written and tested on synthetic fixtures only. The only real file opened was one snapshot from 2026-11-05 16:23 UTC, for the file format. That event cannot qualify (deviation 3), and no outcome or trade was looked at.
+`analyze_stage2.py` follows `docs/PREREGISTRATION_stage2.md` (a verbatim copy of `stage2/PREREGISTRATION.md` in the BOB folder, sha256 `2f81bc69…5944` since deviation 5; `e2dee34a…233e` before it), including deviations 3 to 6. Deviation 5 only fixes how S2 is read, so the code did not change. The pre-registration leaves the points below open. Each one lists the reading the script takes and the main alternative, so a reviewer can object before the test runs. None of these was chosen by looking at data: the script was written and tested on synthetic fixtures only. The only real file opened was one snapshot from 2026-11-05 16:23 UTC, for the file format. That event cannot qualify (deviation 3), and no outcome or trade was looked at.
 
 Items marked **(material)** could plausibly move a result.
 
 ## Which rows enter the tests
 
 1. **(material) Rows come only from settled events that qualify under the 80% rule** on the merged series. The pre-registration says a test "needs" 10 such events, but it doesn't say whether rows from non-qualifying events (Nov 5, Nov 19, or any day with a long outage) also count. Excluding them seemed the natural reading, since the 80% rule exists to keep thinly covered events out. Alternative: all rows, with the 10-event count used only as a gate.
-2. **Settled** means the event has closed and every one of its markets has a non-empty `result` from Kalshi. A voided market loses only its own S2 and S3 rows.
+2. **Settled** means the event has closed and every one of its markets has a non-empty `result` from Kalshi. If any market of an event lacks a result, the whole event is left out, not just that market's rows. (Until 2026-11-18 this item said a voided market lost only its own rows, which is not what the code has done since it was frozen; `docs/REVIEW.md` finding 7.) The run lists any closed event that has enough coverage but a missing result, so this is visible.
 3. **A two-sided quote** means `0 < yes_bid < yes_ask < 1`. Kalshi reports a missing side as 0 or 1.
 4. **The mid band is inclusive**: [0.06, 0.94]. **Hours to close** must satisfy 0 < h < 30, measured from the time the Kalshi market-list request finished.
 5. **5pm markets** are those whose `event_ticker` ends in `17`, the same test the recorder and `status.py` use.
@@ -39,7 +39,7 @@ Items marked **(material)** could plausibly move a result.
 22. **Slot phase.** One phase, the median of t mod 300 over both sources' snapshots. The script prints each source's own median so a mismatch would be visible.
 23. **(edge case) "The local snapshot".** This is the first local snapshot in the slot, the one `status.py` picks. If that one is invalid and a later local snapshot in the same slot is valid, the merge uses the first valid cloud snapshot rather than the later local one. Alternative: the first valid local snapshot.
 24. **Per-source reference results** use `status.py`'s rule on that source alone: the first snapshot in a slot counts.
-25. **Coverage counts a slot for an event** only if that event is listed in the chosen snapshot, as in `status.py`.
+25. **Coverage counts a slot for an event** if the chosen snapshot is valid, whether or not the event is listed in it yet (deviation 6, 2026-11-18). Until then this item read "only if that event is listed in the chosen snapshot", which capped a normal event at about 300 of 360 slots. The earlier reading is still computed and reported for reference (`valid_listed`, `qualifies_listed`, and `merged_before_deviation_6` in the results).
 
 ## Reference results
 
@@ -69,3 +69,13 @@ Items marked **(material)** could plausibly move a result.
 The stage 3 code review (PR #15) found that `pull_after.py` pulled settlements from `GET /markets` only. Kalshi moves markets that settled before a moving cutoff to `GET /historical/markets` (docs.kalshi.com, "Historical data"). So after Nov 19 the earliest 5pm events could have come back with no result. The analysis would then have counted them as unsettled and dropped them, rows and trades included. `settlements()` now also queries `/historical/markets?event_ticker=…` for any event whose markets are missing or unsettled on the live endpoint. A live result is never overwritten. A market filled in from the historical endpoint is tagged `"source": "historical"`, and errors from that endpoint are listed under `historical_errors` in `settlements.json`. This is the same logic as the stage 3 pull. The trade pull already read `/historical/trades`.
 
 This changes data retrieval only. `analyze_stage2.py` is unchanged and still matches the frozen sha256 in `REVIEW.md` (`c0b3dca6…e379`). `pull_after.py` was never covered by that hash. For the record, it was `3c33715a…5f28` before this change and is `cddb55ce…d29e` after. It was tested on mocked API responses only (`tests/test_pull_after.py`), and no real outcome was pulled.
+
+## Change to analyze_stage2.py (2026-11-18, before any outcome or trade was pulled)
+
+After the review in `docs/REVIEW.md`, three changes were made. All were tested on synthetic fixtures only.
+
+- **Coverage (deviation 6).** `event_coverage` counts a valid snapshot whether or not the event is listed in it. The earlier reading is kept as `valid_listed` / `qualifies_listed`, and the run also computes the whole merged test under it as `merged_before_deviation_6`, reference only.
+- **Trade tape guard.** `run` refuses, before writing any result, if no trade tape file exists for any market with rows, or if more than 1% of pulled trades lack `yes_price_dollars`, `count_fp` or `created_time`. Without this, a format change in Kalshi's trade data would give zero fills, which the rules read as an S3 kill. It is a guard, not a rule change: when the tape is readable, nothing changes. The counts are printed (`trade tape: files, trades, parsed`).
+- **Counts added to the output, no rule changed:** S3 fills where no depth was recorded (depth taken as 0, item 18), and closed events left out because a market lacks a result (item 2).
+
+On the two 10.45-day synthetic fixtures used by the end-to-end tests (fair quotes and a 6¢ edge), every number in `stage2_results.json` is identical to the frozen script's output, apart from the new keys. sha256 before: `c0b3dca6…e379`; after: see `analysis/FROZEN_stage2.md`.

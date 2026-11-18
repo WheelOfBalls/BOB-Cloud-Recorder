@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Stage 2 analysis for the BOB crypto kill test, written to docs/PREREGISTRATION_stage2.md (a verbatim copy of
-# stage2/PREREGISTRATION.md in the BOB folder), including deviations 3 and 4. Choices the pre-registration leaves
+# stage2/PREREGISTRATION.md in the BOB folder), including deviations 3, 4 and 6. Choices the pre-registration leaves
 # open are listed in analysis/NOTES.md, each with the reading taken here. Research only: it reads recorded public
 # data and simulates trades. It places no orders and needs no account.
 #
@@ -8,7 +8,9 @@
 #             outcomes or trades, so it is safe to run while recording continues.
 #   run       the one-shot test: S1, S2, S3 and the reference results. Needs settlements and the trade tape
 #             (pull_after.py). Refuses to run on real data before the recording end time, refuses before
-#             every qualifying event has settled, and refuses to overwrite an earlier result.
+#             every qualifying event has settled, and refuses to overwrite an earlier result. It also refuses,
+#             before writing anything, if the trade tape is missing or mostly unreadable (a format problem
+#             would otherwise look like "no fills" and so like an S3 kill).
 #
 # Stdlib only, so it runs with any Python 3.9+ on Windows, Linux or GitHub Actions.
 import os, sys, json, gzip, glob, math, random, argparse, hashlib, statistics, collections, datetime as dt
@@ -32,6 +34,7 @@ SEED = 20261105                 # same seed as stage 1
 YEAR_S = 365.0 * 86400          # calendar time, ACT/365
 DERIBIT_EXPIRY_HOUR = 8         # Deribit BTC options expire 08:00 UTC
 NEED_SLOTS = int(NEED_FRAC * WINDOW_H * 12 + 0.999)   # 288, as in status.py
+MAX_UNPARSED_FRAC = 0.01        # run refuses if more than 1% of pulled trades lack a price, size or time
 FIVE_PM = "17"                  # 5pm ET events: event ticker ends in 17
 TOL = 1e-6
 END_UTC = "2026-11-19T15:25:00+00:00"   # stage2/end_utc.txt; on real data --end must match it
@@ -287,13 +290,18 @@ def build_series(metas, grid, rule):
 
 
 def event_coverage(pick, grid, events):
-    """events: {event_ticker: close_ts}. Valid slots in the 30 h window where the event was listed."""
+    """events: {event_ticker: close_ts}. Valid slots in the 30 h window before the close. Deviation 6: a valid
+    snapshot counts whether or not Kalshi had listed the event yet ('valid', 'qualifies'). The reading used before
+    deviation 6 also needed the event to be listed in the snapshot; it is kept as 'valid_listed' and
+    'qualifies_listed' for reference only."""
     out = {}
     for ev, close in events.items():
         ws = [i for i in range(grid.slot(close - WINDOW_H * 3600) - 1, grid.slot(close) + 2)
               if close - WINDOW_H * 3600 <= grid.slot_t(i) < close]
-        good = sum(1 for i in ws if pick.get(i) is not None and ev in pick[i]["events"])
-        out[ev] = {"close": close, "possible": len(ws), "valid": good, "qualifies": good >= NEED_SLOTS}
+        good = sum(1 for i in ws if pick.get(i) is not None)
+        listed = sum(1 for i in ws if pick.get(i) is not None and ev in pick[i]["events"])
+        out[ev] = {"close": close, "possible": len(ws), "valid": good, "qualifies": good >= NEED_SLOTS,
+                   "valid_listed": listed, "qualifies_listed": listed >= NEED_SLOTS}
     return out
 
 
@@ -462,7 +470,8 @@ def s3_fills(rows, results, tapes, windows, depth_mult=1.0, both_sides=False):
             depth = max(x for x in (dbook, dtop, 0.0) if x is not None)
             if tape_volume(tape, side, price, t0, t1) > depth * depth_mult:
                 fills.append({"event": r["event"], "ticker": r["ticker"], "t": r["t"], "h": r["h"], "side": side,
-                              "price": price, "pnl": payoff(res, side) - price})
+                              "price": price, "pnl": payoff(res, side) - price,
+                              "depth_known": dbook is not None or dtop is not None})
     return fills, orders, no_tape
 
 
@@ -515,6 +524,9 @@ def load_results(path):
     return {k: (v.get("result") if isinstance(v, dict) else v) for k, v in d["markets"].items()}
 
 
+TAPE_STATS = {}   # ticker -> (trades in the pulled file, trades parsed); filled by load_tape, counts only
+
+
 def load_tape(trades_dir, ticker):
     p = os.path.join(trades_dir, ticker + ".json.gz")
     if not os.path.exists(p):
@@ -529,7 +541,20 @@ def load_tape(trades_dir, ticker):
             continue
         out.append((iso_ts(t["created_time"]), yp, c, t.get("taker_side")))
     out.sort()
+    TAPE_STATS[ticker] = (len(d["trades"]), len(out))
     return out, trunc
+
+
+def tape_problem(n_rows):
+    """A reason to refuse the run, or None. A missing or unreadable tape gives zero fills, which the rules would
+    read as an S3 kill, so the run stops before any result is written. Uses counts only."""
+    if n_rows and not TAPE_STATS:
+        return "no trade tape file was found for any market with rows (wrong --trades folder, or the pull did not run)"
+    pulled = sum(a for a, _ in TAPE_STATS.values()); parsed = sum(b for _, b in TAPE_STATS.values())
+    if pulled - parsed > MAX_UNPARSED_FRAC * pulled:
+        return (f"{pulled - parsed} of {pulled} pulled trades have no yes_price_dollars, count_fp or created_time "
+                f"(limit {MAX_UNPARSED_FRAC:.0%}); the trade format has probably changed")
+    return None
 
 
 def series_report(name, metas, grid, rule, now):
@@ -549,7 +574,10 @@ def coverage_text(rep, now, end):
     lines.append("   valid slots by source: " + ", ".join(f"{k} {v}" for k, v in sorted(srcs.items())))
     for ev, c in sorted(cov.items(), key=lambda x: x[1]["close"]):
         tag = "QUALIFIES" if c["qualifies"] else ("fails" if c["close"] <= now or now >= end else "open")
-        lines.append(f"   {ev:22s} close {fmt(c['close'])}Z  valid {c['valid']}/{c['possible']} (need {NEED_SLOTS})  {tag}")
+        if c["qualifies"] and not c["qualifies_listed"]:
+            tag += "  (fails the reading before deviation 6)"
+        lines.append(f"   {ev:22s} close {fmt(c['close'])}Z  valid {c['valid']}/{c['possible']} (need {NEED_SLOTS}), "
+                     f"event listed in {c['valid_listed']}  {tag}")
     return lines
 
 
@@ -570,7 +598,9 @@ def windows_for(rep, grid):
     return win
 
 
-def run_tests(rep, grid, row_cache, results, tapes_dir, now, verbose_lines):
+def run_tests(rep, grid, row_cache, results, tapes_dir, now, verbose_lines, qual_key="qualifies"):
+    """qual_key: "qualifies" is the coverage rule (deviation 6); "qualifies_listed" is the reading used before
+    deviation 6, run for reference only."""
     rng = random.Random(SEED)
     cov = rep["coverage"]
     settled = {}
@@ -578,7 +608,7 @@ def run_tests(rep, grid, row_cache, results, tapes_dir, now, verbose_lines):
         tick = [t for t, r in results.items() if t.startswith(ev + "-")]
         # settled: closed, and every market of the event has a final result (a void market only loses its own rows)
         settled[ev] = c["close"] <= now and bool(tick) and all(results[t] for t in tick)
-    qual = sorted(ev for ev, c in cov.items() if c["qualifies"] and settled[ev])
+    qual = sorted(ev for ev, c in cov.items() if c[qual_key] and settled[ev])
     rows, brackets, dropped = [], [], 0
     for i, m in sorted(rep["pick"].items()):
         if m is None:
@@ -593,7 +623,9 @@ def run_tests(rep, grid, row_cache, results, tapes_dir, now, verbose_lines):
         truncated += tr
     win = windows_for(rep, grid)
     out = {"series": rep["name"], "qualifying_settled_events": qual, "n_events": len(qual), "rows": len(rows),
-           "rows_dropped_no_fair_value": dropped, "row_sources": dict(collections.Counter(r["src"] for r in rows))}
+           "rows_dropped_no_fair_value": dropped, "row_sources": dict(collections.Counter(r["src"] for r in rows)),
+           "closed_events_with_coverage_but_a_missing_result": sorted(
+               ev for ev, c in cov.items() if c[qual_key] and c["close"] <= now and not settled[ev])}
     complete = len(qual) >= NEED_EVENTS
     out["complete"] = complete
     out["S1"] = s1(rows, rng)
@@ -602,6 +634,7 @@ def run_tests(rep, grid, row_cache, results, tapes_dir, now, verbose_lines):
     fills, orders, no_tape = s3_fills(rows, results, tapes, win)
     out["S3"] = s3_summary(fills, rng); out["S3"]["orders"] = orders; out["S3"]["orders_without_tape_or_result"] = no_tape
     out["S3"]["truncated_tapes"] = truncated
+    out["S3"]["fills_with_no_recorded_depth"] = sum(1 for f in fills if not f["depth_known"])
     def verdict(est, extra_kill=False):
         if not complete:
             return "INCOMPLETE"
@@ -671,6 +704,7 @@ def main(argv=None):
     ap.add_argument("--end", default=os.path.join(here, "..", "stage2", "end_utc.txt"))
     ap.add_argument("--now", help="override the clock (synthetic fixtures only)")
     a = ap.parse_args(argv)
+    TAPE_STATS.clear()
     dirs = [("local", a.local), ("cloud", a.cloud)]
     if not a.local and not a.cloud:
         ap.error("give --local and/or --cloud")
@@ -732,13 +766,25 @@ def main(argv=None):
         if any(m["src"] == r for m in metas) or r == "merged":
             out[r] = run_tests(reps[r], grid, row_cache, results, a.trades, now, lines)
     m = out["merged"]
-    lines.append("\n== THE TEST (merged series, deviation 4)")
+    out["merged_before_deviation_6"] = old = run_tests(reps["merged"], grid, row_cache, results, a.trades, now, lines,
+                                                       qual_key="qualifies_listed")
+    out["trade_tape"] = {"files": len(TAPE_STATS), "trades": sum(x for x, _ in TAPE_STATS.values()),
+                         "parsed": sum(y for _, y in TAPE_STATS.values())}
+    problem = tape_problem(m["rows"])
+    if problem:
+        raise SystemExit(f"refusing: {problem}. No result was written.")
+    lines.append("\n== THE TEST (merged series, deviation 4; coverage as in deviation 6)")
     lines.append(f"qualifying settled events {m['n_events']} (need {NEED_EVENTS}): {'complete' if m['complete'] else 'INCOMPLETE'}")
+    if m["closed_events_with_coverage_but_a_missing_result"]:
+        lines.append(f"   closed events with enough coverage but a market without a result (left out): "
+                     f"{m['closed_events_with_coverage_but_a_missing_result']}")
     lines.append(f"rows {m['rows']} by source {m['row_sources']}; rows dropped for lack of a fair value {m['rows_dropped_no_fair_value']}")
     lines.append(f"S1 mean net gap at the touch     {fmt_est(m['S1'])}  -> {m['S1']['verdict']}")
     lines.append(f"S2 mean P&L per contract        {fmt_est(m['S2'])}  trades {m['S2']['trades']}  -> {m['S2']['verdict']}")
     lines.append(f"S3 maker return per dollar      {fmt_est(m['S3'], True)}  fills {m['S3']['fills']} of {m['S3']['orders']} orders  -> {m['S3']['verdict']}")
-    lines.append(f"   S3 orders without a tape or result {m['S3']['orders_without_tape_or_result']}; truncated tapes {m['S3']['truncated_tapes']}")
+    lines.append(f"   S3 orders without a tape or result {m['S3']['orders_without_tape_or_result']}; truncated tapes {m['S3']['truncated_tapes']}; "
+                 f"fills where no depth was recorded (depth taken as 0) {m['S3']['fills_with_no_recorded_depth']}")
+    lines.append(f"   trade tape: {out['trade_tape']['files']} files, {out['trade_tape']['trades']} trades, {out['trade_tape']['parsed']} parsed")
     lines.append("\n== reported, never used to rescue a kill")
     for k, v in m["reference"].items():
         if k.startswith("calibration"):
@@ -753,6 +799,12 @@ def main(argv=None):
             x = out[r]
             lines.append(f"\n== {r} only (reference): events {x['n_events']}, rows {x['rows']}; S1 {fmt_est(x['S1'])}; "
                          f"S2 {fmt_est(x['S2'])}; S3 {fmt_est(x['S3'], True)} fills {x['S3']['fills']}")
+    lines.append(f"\n== merged series under the coverage reading used before deviation 6 (reference only, never used to "
+                 f"choose a verdict): events {old['n_events']} ({'complete' if old['complete'] else 'INCOMPLETE'}), rows {old['rows']}; "
+                 f"S1 {fmt_est(old['S1'])} -> {old['S1']['verdict']}; S2 {fmt_est(old['S2'])} -> {old['S2']['verdict']}; "
+                 f"S3 {fmt_est(old['S3'], True)} fills {old['S3']['fills']} -> {old['S3']['verdict']}")
+    only_new = sorted(set(m["qualifying_settled_events"]) - set(old["qualifying_settled_events"]))
+    lines.append(f"   events that count only because of deviation 6: {only_new if only_new else 'none'}")
     os.makedirs(a.out, exist_ok=True)
     json.dump(out, open(res_path, "w"), indent=1, default=str)
     open(os.path.join(a.out, "stage2_results.txt"), "w").write("\n".join(lines) + "\n")
