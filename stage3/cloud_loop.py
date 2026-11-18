@@ -139,6 +139,21 @@ def series_meta(data, fetch=None):
             f.write(f"{iso(time.time())},{series},{s.get('frequency', '')},{s.get('fee_type', '')},{s.get('fee_multiplier', '')}\n")
 
 
+HANDOVER_S = 120                # when a run hits its time limit, it stops this long before the next slot
+
+
+def poll_stop(target, hi, deadline):
+    """When the run's minute poll stops, given the first slot target the run did not take.
+    At the end of the window (target >= hi) the poll runs on to the window's end, so the last close is covered. When
+    the run stops for its own time limit, a queued successor takes over at `target`, so this run ends HANDOVER_S
+    before it. Until 2026-11-18 the poll always ran to deadline - 60, which ended the run after `target` and lost
+    one slot at every handover (docs/REVIEW.md, finding 5)."""
+    stop = min(hi, deadline - 60)
+    if target < hi:
+        stop = min(stop, target - HANDOVER_S)
+    return stop
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--which", action="store_true", help="print the current mode and its branch, then exit")
@@ -210,8 +225,9 @@ def main():
         t1 = time.time()
         p = "skipped" if nopush else push(repo, branch, f"stage3 {a.mode} snapshot {iso(target)}")
         note("slot", iso(target), run, ev, f"{t0 - target:.1f}", f"{t1 - t0:.1f}", f"rc={rc} {p}")
-    # keep the minute poll going to the run's end (or the window's), so the last hourly close of the run is covered
-    while time.time() < min(hi, deadline - 60) and poller.is_alive():
+    # keep the minute poll going until the successor can take over (or to the window's end)
+    stop_at = poll_stop(target, hi, deadline)
+    while time.time() < stop_at and poller.is_alive():
         time.sleep(5)
     poller.stop.set()
     poller.join(timeout=70)

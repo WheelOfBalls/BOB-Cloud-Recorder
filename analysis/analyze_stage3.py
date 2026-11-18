@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-# Stage 3 analysis for the BOB crypto test, written to docs/stage3/PREREGISTRATION_stage3.md (frozen, sha256
-# a62576a8...c515). Readings of points it leaves open are in analysis/NOTES_stage3.md. Research only: it reads
+# Stage 3 analysis for the BOB crypto test, written to docs/stage3/PREREGISTRATION_stage3.md (frozen 2026-11-06 as
+# sha256 a62576a8...c515; it changes only through its deviations log, and its current hash is in
+# analysis/FROZEN_stage3.md). Readings of points it leaves open are in analysis/NOTES_stage3.md. Research only: it reads
 # recorded public data and simulates trades. It places no orders and needs no account.
 #
 #   coverage  slots and validity per UTC day and the 80% day rule. Counts only, safe while recording continues.
@@ -191,6 +192,8 @@ def idx(r):
 
 
 def coin_valid(s, coin):
+    if "_valid" in s:                      # a compacted snapshot (load_snapshots) carries its validity
+        return s["_valid"][coin]
     c = (s.get("coins") or {}).get(coin) or {}
     ch, kd = c.get("chain") or {}, c.get("kalshi") or {}
     if not ch.get("options") or not kd.get("markets") or not kd.get("complete", True):
@@ -221,8 +224,38 @@ def read_snapshot(p):
         return None
 
 
-def load_snapshots(data):
-    """Snapshots from <data>/<YYYY-MM-DD>/*.json.gz, the first one in each slot (stage 2's rule)."""
+_TICKERS = {}
+
+
+def compact(s, i, rows=True):
+    """Works out, from the heavy parts of one snapshot (option chains, market lists, books, brackets), everything the
+    analysis later reads from them: validity per coin, its candidate rows (snapshot_rows) and its hourly tickers. Then
+    it drops those parts. A full snapshot takes about 2 MB in memory, so keeping 28 days of them would take about
+    16 GB (docs/REVIEW.md, finding 2). The results are the same as on the full snapshot. An error in snapshot_rows is
+    kept and raised only where the full snapshot would have raised it (all_rows, on a counted day)."""
+    s["_valid"] = {c: coin_valid(s, c) for c in COINS}
+    s["_rows"] = {}
+    if rows:
+        for c in COINS:
+            if s["_valid"][c]:
+                try:
+                    s["_rows"][c] = snapshot_rows(s, i, c)
+                except Exception as e:      # noqa: BLE001
+                    s["_rows"][c] = e
+    s["_tickers"] = tuple(_TICKERS.setdefault(m["ticker"], m["ticker"]) for c in COINS
+                          for m in ((((s.get("coins") or {}).get(c) or {}).get("kalshi") or {}).get("markets") or [])
+                          if is_hourly(m.get("event_ticker")))
+    for k in ("books", "brackets"):
+        s.pop(k, None)
+    for c in (s.get("coins") or {}).values():
+        (c.get("chain") or {}).pop("options", None)
+        (c.get("kalshi") or {}).pop("markets", None)
+    return s
+
+
+def load_snapshots(data, rows=True):
+    """Snapshots from <data>/<YYYY-MM-DD>/*.json.gz, the first one in each slot (stage 2's rule), each compacted.
+    rows=False skips the row pipeline (coverage needs validity only)."""
     out, bad, dup = {}, 0, 0
     for p in sorted(glob.glob(os.path.join(data, "*", "*.json.gz"))):
         s = read_snapshot(p)
@@ -234,7 +267,7 @@ def load_snapshots(data):
             dup += 1
             if iso_ts(s["utc"]) >= iso_ts(out[i]["utc"]):
                 continue
-        out[i] = s
+        out[i] = compact(s, i, rows)
     return out, bad, dup
 
 
@@ -336,7 +369,13 @@ def all_rows(snaps, days):
         for coin in COINS:
             if not coin_valid(s, coin):
                 continue
-            rs, dr, nf = snapshot_rows(s, i, coin)
+            if "_valid" in s:
+                got = s["_rows"][coin]
+                if isinstance(got, Exception):
+                    raise got
+                rs, dr, nf = got
+            else:
+                rs, dr, nf = snapshot_rows(s, i, coin)
             fits[(coin, nf)] += 1
             drop.update(dr)
             for r in rs:
@@ -529,7 +568,8 @@ def maker_fills(rows, results, tapes, win):
                 continue
             depth = max(x for x in (dbook, dtop, 0.0) if x is not None)
             if a2.tape_volume(tape, side, price, t0, t1) > depth:
-                fills.append(dict(r, side=side, price=price, pnl=(1.0 if res == side else 0.0) - price))
+                fills.append(dict(r, side=side, price=price, pnl=(1.0 if res == side else 0.0) - price,
+                                  depth_known=dbook is not None or dtop is not None))
     return fills, orders, missing
 
 
@@ -600,7 +640,8 @@ def analyse(snaps, polls, results, tapes, start, end):
     def t1_block(trs):
         add_hedges(trs, polls)
         hed, unh = cluster(trs, lambda x: x["hedged"]), cluster(trs, lambda x: x["pnl"])
-        return {"trades": len(trs), "hedged": hed, "unhedged": unh}
+        return {"trades": len(trs), "hedged": hed, "unhedged": unh,
+                "trades_without_a_hedge_path": sum(1 for x in trs if x["hedged_points"] < 2)}
 
     trades, unsettled = taker_trades(rows, results)
     T1 = t1_block(trades)
@@ -611,7 +652,8 @@ def analyse(snaps, polls, results, tapes, start, end):
     win = order_windows(snaps)
     fills, orders, missing = maker_fills(rows, results, tapes, win)
     T2 = cluster(fills, lambda f: f["pnl"], lambda f: f["price"])
-    T2.update({"fills": len(fills), "orders": orders, "orders_without_tape_or_result": missing})
+    T2.update({"fills": len(fills), "orders": orders, "orders_without_tape_or_result": missing,
+               "fills_with_no_recorded_depth": sum(1 for f in fills if not f["depth_known"])})
     T2["verdict"] = t2_verdict(T2, len(fills), complete)
     out["T2"] = T2
 
@@ -658,8 +700,15 @@ def text_report(out, synthetic, sha):
     t1 = out["T1"]
     L.append(f"T1 hedged P&L per contract   {fmt_ci(t1['hedged'])}")
     L.append(f"   unhedged P&L per contract {fmt_ci(t1['unhedged'])}   trades {t1['trades']}  -> {t1['verdict']}")
+    L.append(f"   trades with no hedge path (hedged P&L = unhedged) {t1['trades_without_a_hedge_path']}; "
+             f"unsettled trades dropped {t1['unsettled_trades_dropped']}")
     t2 = out["T2"]
     L.append(f"T2 maker return per dollar   {fmt_ci(t2, cents=False)}  fills {t2['fills']} of {t2['orders']} orders  -> {t2['verdict']}")
+    L.append(f"   fills where no depth was recorded (depth taken as 0) {t2['fills_with_no_recorded_depth']}; "
+             f"orders without a tape or result {t2['orders_without_tape_or_result']}")
+    tt = out.get("trade_tape")
+    if tt:
+        L.append(f"   trade tape: {tt['files']} files, {tt['trades']} trades, {tt['parsed']} parsed")
     L += ["   (only T1 can justify a next stage)", "", "== reported, never used to rescue a verdict"]
     for k, v in out["reference"].items():
         if k.startswith("calibration"):
@@ -689,7 +738,8 @@ def main(argv=None):
     ap.add_argument("--now", help="override the clock (synthetic fixtures only)")
     ap.add_argument("--start", default=START_UTC); ap.add_argument("--end", default=END_UTC)
     a = ap.parse_args(argv)
-    snaps, bad, dup = load_snapshots(a.data)
+    a2.TAPE_STATS.clear()
+    snaps, bad, dup = load_snapshots(a.data, rows=a.mode != "coverage")
     if not snaps:
         raise SystemExit("no readable stage 3 snapshots")
     synthetic = is_synthetic(a.data, snaps)
@@ -732,10 +782,7 @@ def main(argv=None):
     polls = load_polls(a.data)
     tickers = set()
     for s in snaps.values():
-        for c in COINS:
-            for m in (((s.get("coins") or {}).get(c) or {}).get("kalshi") or {}).get("markets") or []:
-                if is_hourly(m.get("event_ticker")):
-                    tickers.add(m["ticker"])
+        tickers.update(s["_tickers"])
     tapes, truncated = {}, 0
     for t in tickers:
         tp, tr = a2.load_tape(a.trades, t)
@@ -743,9 +790,14 @@ def main(argv=None):
             tapes[t] = tp
         truncated += bool(tr)
     out, rows, trades, fills = analyse(snaps, polls, results, tapes, start, end)
+    problem = a2.tape_problem(len(rows))      # a missing or unreadable tape would read as a T2 kill (docs/REVIEW.md, finding 3)
+    if problem:
+        raise SystemExit(f"refusing: {problem}. No result was written.")
     sha, sha2 = file_sha(__file__), file_sha(a2.__file__)
     out.update({"synthetic": synthetic, "run_utc": fmt(now), "script_sha256": sha, "stage2_fitter_sha256": sha2,
-                "truncated_tapes": truncated})
+                "truncated_tapes": truncated,
+                "trade_tape": {"files": len(a2.TAPE_STATS), "trades": sum(x for x, _ in a2.TAPE_STATS.values()),
+                               "parsed": sum(y for _, y in a2.TAPE_STATS.values())}})
     text = text_report(out, synthetic, sha)
     os.makedirs(a.out, exist_ok=True)
     with open(res_path, "w") as f:

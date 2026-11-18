@@ -1,9 +1,10 @@
 # Tests for analysis/analyze_stage3.py on synthetic fixtures only (tests/make_fixture_stage3.py). No real data.
-import os, sys, json, gzip, math, random, tempfile, unittest, contextlib, io, datetime as dt
+import os, sys, json, gzip, glob, math, random, tempfile, unittest, contextlib, io, datetime as dt
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE)); sys.path.insert(0, HERE)
 import analyze_stage3 as a3  # noqa: E402
+import analyze_stage2 as a2  # noqa: E402
 import make_fixture_stage3 as mf  # noqa: E402
 
 UTC = dt.timezone.utc
@@ -53,6 +54,8 @@ class TestPieces(unittest.TestCase):
         self.assertEqual(a3.t1_verdict(h(-0.02, 0.009), {"est": 0.01}, 500, True), "KILL")           # upper bound < 1 cent
         self.assertEqual(a3.t1_verdict(h(0.01, 0.05), {"est": 0.01}, 199, True), "KILL")             # under 200 trades
         self.assertEqual(a3.t1_verdict(h(-0.01, 0.02), {"est": 0.01}, 500, True), "INCONCLUSIVE")
+        # deviation 2: bounds strictly between 0 and 1 cent meet both the PASS and the KILL condition; KILL wins
+        self.assertEqual(a3.t1_verdict(h(0.002, 0.008), {"est": 0.004}, 5000, True), "KILL")
         self.assertEqual(a3.t1_verdict(h(0.01, 0.05), {"est": 0.01}, 500, False), "INCOMPLETE")
         self.assertEqual(a3.t2_verdict(h(0.01, 0.05), 300, True), "PASS")
         self.assertEqual(a3.t2_verdict(h(-0.05, -0.01), 300, True), "KILL")
@@ -213,6 +216,39 @@ class TestDriverAndGuards(unittest.TestCase):
             js = json.load(f)
         self.assertTrue(js["synthetic"]); self.assertEqual(len(js["script_sha256"]), 64)
         self.assertGreater(js["T2"]["fills"], 0)
+
+    def test_compacted_snapshots_give_the_same_analysis(self):
+        """load_snapshots drops the heavy parts of each snapshot after working out its rows (docs/REVIEW.md, finding 2).
+        The analysis must be the same as on the full snapshots."""
+        full = {}
+        for p in sorted(glob.glob(os.path.join(self.data, "*", "*.json.gz"))):
+            snap = a3.read_snapshot(p)
+            if snap and snap.get("stage") == 3:
+                i = a3.slot_of(snap)
+                if i not in full or a3.iso_ts(snap["utc"]) < a3.iso_ts(full[i]["utc"]):
+                    full[i] = snap
+        small, _, _ = a3.load_snapshots(self.data)
+        self.assertEqual(sorted(full), sorted(small))
+        self.assertTrue(all("options" not in s["coins"]["BTC"]["chain"] for s in small.values()))
+        results = a3.load_results(os.path.join(self.out, "settlements.json"))
+        polls = a3.load_polls(self.data)
+        tapes = {}
+        for t in {m["ticker"] for s in full.values() for c in a3.COINS for m in s["coins"][c]["kalshi"]["markets"]}:
+            tp, _ = a2.load_tape(os.path.join(self.out, "trades"), t)
+            if tp is not None:
+                tapes[t] = tp
+        a = a3.analyse(full, polls, results, tapes, START, START + 2 * 86400)[0]
+        b = a3.analyse(small, polls, results, tapes, START, START + 2 * 86400)[0]
+        self.assertEqual(json.dumps(a, sort_keys=True, default=str), json.dumps(b, sort_keys=True, default=str))
+
+    def test_run_refuses_an_unreadable_tape(self):
+        empty = tempfile.mkdtemp(dir=self.out)
+        res = os.path.join(self.out, "res_no_tape")
+        with self.assertRaises(SystemExit) as e:
+            self.run_main("run", "--data", self.data, "--settlements", os.path.join(self.out, "settlements.json"),
+                          "--trades", empty, "--out", res, "--now", "2026-12-20T00:00:00+00:00")
+        self.assertIn("no trade tape file", str(e.exception))
+        self.assertFalse(os.path.exists(os.path.join(res, "stage3_results.json")))
 
     def real_copy(self, mode="live"):
         """A copy of the fixture that looks real: no marker, no synthetic flag."""

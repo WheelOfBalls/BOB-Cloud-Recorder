@@ -1,4 +1,18 @@
-# BOB stage 2 cloud recorder
+# BOB
+
+BOB is a staged, pre-registered test of whether Kalshi's crypto price contracts are mispriced against a fair value taken from Deribit options, by enough to beat fees and the spread. Research only: public read-only Kalshi and Deribit data, no account, no keys, no orders, no money.
+
+| Stage | What | Dates (UTC) | Where |
+|---|---|---|---|
+| 1 | Historical maker tape study. Passed. Its code lives on the Windows computer, not here. | done | `docs/PREREGISTRATION_stage1.md`, `docs/RESULTS_stage1.md` |
+| 2 | 5-minute snapshots of the daily 5pm Bitcoin contracts and the Deribit chain, from the Windows computer and from GitHub Actions; tests S1 to S3 | recording 2026-11-05 to 2026-11-19 15:25; one-shot run after that | `stage2/`, `analysis/`, `docs/PREREGISTRATION_stage2.md` |
+| 3 | Hourly Bitcoin and Ether contracts with a delta hedge; tests T1 and T2 | live 2026-11-20 00:00 to 2026-12-18 00:00; one-shot run after that | `stage3/`, `analysis/analyze_stage3.py`, `docs/stage3/` |
+
+Each pre-registration changes only through its deviations log, and the frozen analysis files are hashed in `analysis/FROZEN_stage2.md` and `analysis/FROZEN_stage3.md` (checked by `tests/test_frozen.py`). `docs/REVIEW.md` is a whole-repository review from 2026-11-17. The stage 2 run checklist is `analysis/RUN_CHECKLIST_stage2.md`.
+
+The rest of this page is about the stage 2 cloud recorder. The stage 3 recorder is described in `stage3/README.md`.
+
+# Stage 2 cloud recorder
 
 A second copy of the BOB crypto stage 2 recorder that runs in GitHub Actions, so snapshots keep coming when the Windows computer is asleep, offline or out of memory. The Windows task keeps running too. Research only: public read-only Kalshi and Deribit endpoints, no account, no keys, no orders.
 
@@ -30,7 +44,7 @@ python3 -I stage2/status.py --cloud ../stage2-data     # or merge with a checkou
 python3 -I stage2/status.py                            # local data/ only, exactly as before
 ```
 
-On the Windows computer, copy `stage2/status.py` next to the local recorder and run it there; `--fetch-cloud` needs `git` on the PATH. The detailed sections describe the merged series; `--source local` or `--source cloud` switches them to one recorder without changing which series the rule uses. The "Sources compared" section at the end gives, for each series, valid slots, the longest gap, any gaps over 6 hours (one such gap inside an event's 30 h window is enough to fail it), and the valid-slot count for each 5pm event.
+On the Windows computer, copy `stage2/status.py` next to the local recorder and run it there; `--fetch-cloud` needs `git` on the PATH. The detailed sections describe the merged series; `--source local` or `--source cloud` switches them to one recorder without changing which series the rule uses. The "Sources compared" section at the end gives, for each series, valid slots, the longest gap, any gaps over 6 hours (one such gap inside an event's 30 h window is enough to fail it; under deviation 6 a valid snapshot counts even before Kalshi lists the event, so an event can lose up to 72 slots), and the valid-slot count for each 5pm event.
 
 ## Checks
 

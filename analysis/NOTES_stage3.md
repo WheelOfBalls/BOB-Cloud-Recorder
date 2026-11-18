@@ -1,6 +1,6 @@
 # Stage 3 analysis: readings of the pre-registration
 
-`analyze_stage3.py` follows `docs/stage3/PREREGISTRATION_stage3.md` (frozen 2026-11-06, sha256 `a62576a8…c515`), which is not edited. Where it leaves a point open, the reading taken is listed here with the main alternative, so a reviewer can object before the test runs. Nothing here was chosen by looking at data: the script was written and tested on synthetic fixtures (`tests/make_fixture_stage3.py`). The only real files it has read are counts-only `preflight` runs on the first pilot snapshots (to check the format). No price, gap, p_opt, outcome or trade from real data was printed or looked at. Recorder readings are in `stage3/NOTES.md`. Items marked **(material)** could plausibly move a result.
+`analyze_stage3.py` follows `docs/stage3/PREREGISTRATION_stage3.md` (frozen 2026-11-06 as sha256 `a62576a8…c515`; it changes only through its deviations log, and its current sha256 is in `FROZEN_stage3.md`). Where it leaves a point open, the reading taken is listed here with the main alternative, so a reviewer can object before the test runs. Nothing here was chosen by looking at data: the script was written and tested on synthetic fixtures (`tests/make_fixture_stage3.py`). The only real files it has read are counts-only `preflight` runs on the first pilot snapshots (to check the format). No price, gap, p_opt, outcome or trade from real data was printed or looked at. Recorder readings are in `stage3/NOTES.md`. Items marked **(material)** could plausibly move a result.
 
 ## Rows
 

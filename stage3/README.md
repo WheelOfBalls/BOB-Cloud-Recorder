@@ -17,7 +17,10 @@ Each recording run queues the next one (GitHub's cron fires far less often than 
 
 - **pilot** (now before `pilot_until_utc.txt`): records to the `stage3-pilot` branch. At the end of every run the workflow writes `report/pilot_report.md` (and `.json`) on that branch and in the run's summary. **Pilot data is thrown away: it never enters the test.** It also holds the 5pm KXBTCD quotes recorded during stage 2, so nobody should open it beyond the counts report.
 - **live** (from 5 hours before `start_utc.txt` to `end_utc.txt`): records to `stage3-data`. Slots before the start are skipped, so the first snapshot is at 2026-11-20 00:02:30 UTC.
+- **wait** (between the pilot's end and the live lead): the run sleeps, records nothing, and keeps the run chain alive so the live window starts on time. Its last wait run ends a minute into the live lead.
 - **off** (otherwise): the run exits after a few seconds.
+
+A run that reaches its own time limit stops its minute poll two minutes before the next slot, so the queued successor takes that slot (`HANDOVER_S` in `cloud_loop.py`). Before 2026-11-18 every handover lost one slot.
 
 During the live window only `counts_report.py` may be run on `stage3-data` (no spreads are printed there). Settlements and trades are pulled after the end, never during.
 

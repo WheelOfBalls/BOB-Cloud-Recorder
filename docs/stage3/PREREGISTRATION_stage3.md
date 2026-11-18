@@ -115,3 +115,17 @@ t is the one-sided 95% Student t quantile with D − 1 degrees of freedom.
 **Why.** `index_after` is read after the Kalshi quote, and the hedged P&L is measured from it. A spot move between `index_before` and the quote triggers trades against that move. Requiring |`index_after` − `index_before`| to be small then keeps mostly the trades whose next move (quote to `index_after`) reversed it, which is the direction the trade bet on. So the rule selects on information a taker could not have had. In a zero-edge synthetic world (Kalshi quoting the true probability at the quote instant), it raised the expected hedged P&L by +1.0 to +2.1¢ per contract in an exact-expectation simulation, and by +1.76¢ on average over 6 seeds of the frozen analysis code. In one seed both PASS conditions held on the mean. That bias is as large as the 1¢ KILL margin. Details and scripts: `docs/stage3/REVIEW_code.md` (finding 1) and `docs/stage3/review_code/`. The purpose the rule was added for, which is not trusting quotes taken while the index moved, is still served without look-ahead by the 5 s validity rule, by starting the hedge after the quote, and by the stale-quote split.
 
 **Code.** `analysis/analyze_stage3.py` (new sha256 in `analysis/FROZEN_stage3.md`), with a test that a moved `index_after` flags rows and does not drop them. The zero-edge check was re-run after the change (results in `REVIEW_code.md`).
+
+### Deviation 2 (2026-11-18, before any live stage 3 data): T1 tie-break, and guards that refuse instead of killing
+
+**Approval.** Under Mattias's delegation of 2026-11-17 04:15 UTC ("Follow the best option for everything. Proceed autonomously I do not want to be involved"), given after he read the review in `docs/REVIEW.md` and its open questions. Mattias has not reviewed this text.
+
+**Data seen.** None. The live window starts on 2026-11-20. Only synthetic fixtures and counts-only runs on the pilot were used.
+
+**Changes.**
+- **T1 tie-break.** If the hedged lower bound is above 0 and the upper bound is below 1¢, both the PASS and the KILL conditions in the table hold. The verdict is then **KILL**: an edge shown to be under 1¢ per contract is not worth the paper test. This is what the frozen code already did; it is now written down (`docs/REVIEW.md`, finding 8).
+- **Trade tape.** `run` refuses, without writing a result, if no trade-tape file exists or more than 1% of pulled trades lack a price, size or time. Without this, a format change in Kalshi's trade data would give zero fills, which the table reads as a T2 kill. When the tape is readable nothing changes (finding 3).
+- **Counts added to the output, no rule changed.** The number of trades with no hedge path (their hedged P&L equals the unhedged one) and the number of T2 fills where no depth was recorded (depth taken as 0).
+- **Memory.** `analyze_stage3.py` now works out each snapshot's rows as it reads it and drops the option chains, market lists, books and brackets. The full snapshots would have needed about 16 GB for 28 days. On synthetic fixtures the results are identical, and on the pilot the counts-only output is identical (finding 2).
+
+**Also recorded under the same delegation.** Deviation 1 stays. The reliable minimum detectable mispricing of about 6¢ (not the 4¢ in the draft Mattias approved) is accepted, with the gates unchanged.
