@@ -2,3 +2,4 @@ kind,utc,run_id,event,late_s_or_cron,duration_s,status
 run_start,2026-11-19T19:01:19+00:00,44593864249,workflow_dispatch,,,live
 slot,2026-11-20T00:02:30+00:00,44593864249,workflow_dispatch,0.0,4.4,rc=0 pushed
 slot,2026-11-20T00:07:30+00:00,44593864249,workflow_dispatch,0.0,4.2,rc=0 pushed
+slot,2026-11-20T00:12:30+00:00,44593864249,workflow_dispatch,0.0,3.9,rc=0 pushed
