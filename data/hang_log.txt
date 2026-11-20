@@ -1,0 +1,5 @@
+Timeout (0:02:50)!
+Thread 0x00007f2b27fd9080 (most recent call first):
+  File "/home/runner/work/BOB-Cloud-Recorder/BOB-Cloud-Recorder/stage3/record_snapshot.py", line 141 in snapshot
+  File "/home/runner/work/BOB-Cloud-Recorder/BOB-Cloud-Recorder/stage3/record_snapshot.py", line 202 in main
+  File "/home/runner/work/BOB-Cloud-Recorder/BOB-Cloud-Recorder/stage3/record_snapshot.py", line 211 in <module>
