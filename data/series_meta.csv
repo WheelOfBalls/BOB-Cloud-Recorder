@@ -41,3 +41,5 @@ utc,series,frequency,fee_type,fee_multiplier
 2026-11-24T03:41:15+00:00,KXETHD,hourly,quadratic,1
 2026-11-24T09:21:26+00:00,KXBTCD,hourly,quadratic,1
 2026-11-24T09:21:26+00:00,KXETHD,hourly,quadratic,1
+2026-11-24T15:01:22+00:00,KXBTCD,hourly,quadratic,1
+2026-11-24T15:01:22+00:00,KXETHD,hourly,quadratic,1
