@@ -1,0 +1,87 @@
+stage 2 analysis  REAL DATA  now 2026-11-24 00:04Z  end 2026-11-19 15:25Z
+snapshots: Counter({'cloud': 3964, 'local': 1222}); unreadable 0; slot phase 182.0s
+   local median phase 182.3s
+   cloud median phase 182.0s
+   snapshots whose own source block disagrees with their folder: 0
+== coverage, merged: slots with a snapshot 4002, valid 3992
+   valid slots by source: cloud 2867, local 1125
+   KXBTCD-26NOV0517       close 2026-11-05 22:00Z  valid 69/360 (need 288), event listed in 69  fails
+   KXBTCD-26NOV0617       close 2026-11-06 22:00Z  valid 356/360 (need 288), event listed in 356  QUALIFIES
+   KXBTCD-26NOV0717       close 2026-11-07 22:00Z  valid 360/360 (need 288), event listed in 300  QUALIFIES
+   KXBTCD-26NOV0817       close 2026-11-08 22:00Z  valid 360/360 (need 288), event listed in 300  QUALIFIES
+   KXBTCD-26NOV0917       close 2026-11-09 22:00Z  valid 360/360 (need 288), event listed in 300  QUALIFIES
+   KXBTCD-26NOV1017       close 2026-11-10 22:00Z  valid 351/360 (need 288), event listed in 291  QUALIFIES
+   KXBTCD-26NOV1117       close 2026-11-11 22:00Z  valid 344/360 (need 288), event listed in 284  QUALIFIES  (fails the reading before deviation 6)
+   KXBTCD-26NOV1217       close 2026-11-12 22:00Z  valid 340/360 (need 288), event listed in 284  QUALIFIES  (fails the reading before deviation 6)
+   KXBTCD-26NOV1317       close 2026-11-13 22:00Z  valid 360/360 (need 288), event listed in 360  QUALIFIES
+   KXBTCD-26NOV1417       close 2026-11-14 22:00Z  valid 359/360 (need 288), event listed in 299  QUALIFIES
+   KXBTCD-26NOV1517       close 2026-11-15 22:00Z  valid 359/360 (need 288), event listed in 299  QUALIFIES
+   KXBTCD-26NOV1617       close 2026-11-16 22:00Z  valid 360/360 (need 288), event listed in 300  QUALIFIES
+   KXBTCD-26NOV1717       close 2026-11-17 22:00Z  valid 360/360 (need 288), event listed in 300  QUALIFIES
+   KXBTCD-26NOV1817       close 2026-11-18 22:00Z  valid 360/360 (need 288), event listed in 300  QUALIFIES
+   KXBTCD-26NOV1917       close 2026-11-19 22:00Z  valid 281/360 (need 288), event listed in 221  fails
+   KXBTCD-26NOV2017       close 2026-11-20 22:00Z  valid 0/360 (need 288), event listed in 0  fails
+   (the merged series is the one the tests use; local and cloud are reference only)
+== coverage, local: slots with a snapshot 1220, valid 1125
+   valid slots by source: local 1125
+   KXBTCD-26NOV0517       close 2026-11-05 22:00Z  valid 69/360 (need 288), event listed in 69  fails
+   KXBTCD-26NOV0617       close 2026-11-06 22:00Z  valid 181/360 (need 288), event listed in 181  fails
+   KXBTCD-26NOV0917       close 2026-11-09 22:00Z  valid 61/360 (need 288), event listed in 61  fails
+   KXBTCD-26NOV1017       close 2026-11-10 22:00Z  valid 144/360 (need 288), event listed in 95  fails
+   KXBTCD-26NOV1117       close 2026-11-11 22:00Z  valid 135/360 (need 288), event listed in 135  fails
+   KXBTCD-26NOV1317       close 2026-11-13 22:00Z  valid 202/360 (need 288), event listed in 202  fails
+   KXBTCD-26NOV1417       close 2026-11-14 22:00Z  valid 65/360 (need 288), event listed in 30  fails
+   KXBTCD-26NOV1517       close 2026-11-15 22:00Z  valid 77/360 (need 288), event listed in 68  fails
+   KXBTCD-26NOV1617       close 2026-11-16 22:00Z  valid 187/360 (need 288), event listed in 187  fails
+   KXBTCD-26NOV1717       close 2026-11-17 22:00Z  valid 219/360 (need 288), event listed in 179  fails
+   KXBTCD-26NOV2017       close 2026-11-20 22:00Z  valid 0/360 (need 288), event listed in 0  fails
+== coverage, cloud: slots with a snapshot 3964, valid 3954
+   valid slots by source: cloud 3954
+   KXBTCD-26NOV0517       close 2026-11-05 22:00Z  valid 31/360 (need 288), event listed in 31  fails
+   KXBTCD-26NOV0617       close 2026-11-06 22:00Z  valid 319/360 (need 288), event listed in 319  QUALIFIES
+   KXBTCD-26NOV0717       close 2026-11-07 22:00Z  valid 360/360 (need 288), event listed in 300  QUALIFIES
+   KXBTCD-26NOV0817       close 2026-11-08 22:00Z  valid 360/360 (need 288), event listed in 300  QUALIFIES
+   KXBTCD-26NOV0917       close 2026-11-09 22:00Z  valid 360/360 (need 288), event listed in 300  QUALIFIES
+   KXBTCD-26NOV1017       close 2026-11-10 22:00Z  valid 351/360 (need 288), event listed in 291  QUALIFIES
+   KXBTCD-26NOV1117       close 2026-11-11 22:00Z  valid 344/360 (need 288), event listed in 284  QUALIFIES  (fails the reading before deviation 6)
+   KXBTCD-26NOV1217       close 2026-11-12 22:00Z  valid 340/360 (need 288), event listed in 284  QUALIFIES  (fails the reading before deviation 6)
+   KXBTCD-26NOV1317       close 2026-11-13 22:00Z  valid 360/360 (need 288), event listed in 360  QUALIFIES
+   KXBTCD-26NOV1417       close 2026-11-14 22:00Z  valid 359/360 (need 288), event listed in 299  QUALIFIES
+   KXBTCD-26NOV1517       close 2026-11-15 22:00Z  valid 359/360 (need 288), event listed in 299  QUALIFIES
+   KXBTCD-26NOV1617       close 2026-11-16 22:00Z  valid 360/360 (need 288), event listed in 300  QUALIFIES
+   KXBTCD-26NOV1717       close 2026-11-17 22:00Z  valid 360/360 (need 288), event listed in 300  QUALIFIES
+   KXBTCD-26NOV1817       close 2026-11-18 22:00Z  valid 360/360 (need 288), event listed in 300  QUALIFIES
+   KXBTCD-26NOV1917       close 2026-11-19 22:00Z  valid 281/360 (need 288), event listed in 221  fails
+   KXBTCD-26NOV2017       close 2026-11-20 22:00Z  valid 0/360 (need 288), event listed in 0  fails
+
+== THE TEST (merged series, deviation 4; coverage as in deviation 6)
+qualifying settled events 13 (need 10): complete
+rows 51190 by source {'local': 17491, 'cloud': 33699}; rows dropped for lack of a fair value 0
+S1 mean net gap at the touch     +0.0100 [+0.0061, +0.0146] (days 13, n 51190)  -> PASS
+S2 mean P&L per contract        -0.0674 [-0.1359, -0.0011] (days 13, n 324)  trades 324  -> KILL
+S3 maker return per dollar      -1.33% [-10.44%, +8.54%] (days 13, n 282)  fills 410 of 56724 orders  -> KILL
+   S3 orders without a tape or result 0; truncated tapes 0; fills where no depth was recorded (depth taken as 0) 0
+   trade tape: 326 files, 641368 trades, 641368 parsed
+
+== reported, never used to rescue a kill
+S3_half_depth: -0.17% [-10.20%, +10.14%] (days 13, n 746) fills 1080
+S3b_both_sides: +2.81% [-1.88%, +7.85%] (days 13, n 485) fills 798
+S3_hours_last_hour: -2.79% [-31.19%, +13.37%] (days 11, n 32) fills 60
+S3_hours_1_6h: -7.20% [-19.63%, +14.94%] (days 13, n 71) fills 101
+S3_hours_gt_6h: +1.26% [-7.92%, +11.00%] (days 13, n 179) fills 249
+calibration_final_before_T_minus_1h: markets 325
+   brier_p_opt: +0.0434 [+0.0207, +0.0876] (days 13, n 325)
+   brier_mid: +0.0465 [+0.0218, +0.0909] (days 13, n 325)
+   brier_p_opt_minus_mid: -0.0031 [-0.0084, -0.0001] (days 13, n 325)
+   logloss_p_opt: +0.1638 [+0.0986, +0.2818] (days 13, n 325)
+   logloss_mid: +0.1901 [+0.1174, +0.3275] (days 13, n 325)
+   logloss_p_opt_minus_mid: -0.0264 [-0.0539, -0.0095] (days 13, n 325)
+KXBTC_bracket_gap: -0.0025 [-0.0054, +0.0009] (days 13, n 25600)
+S1_with_fee_rounded_up_to_cent: +0.0055 [+0.0018, +0.0100] (days 13, n 51190)
+
+== local only (reference): events 0, rows 0; S1 n/a; S2 n/a; S3 n/a fills 0
+
+== cloud only (reference): events 13, rows 50646; S1 +0.0101 [+0.0061, +0.0149] (days 13, n 50646); S2 -0.0650 [-0.1324, +0.0034] (days 13, n 322); S3 -1.60% [-11.05%, +9.61%] (days 13, n 280) fills 408
+
+== merged series under the coverage reading used before deviation 6 (reference only, never used to choose a verdict): events 11 (complete), rows 43472; S1 +0.0114 [+0.0069, +0.0169] (days 11, n 43472) -> PASS; S2 -0.0771 [-0.1550, -0.0081] (days 11, n 274) -> KILL; S3 -0.84% [-10.69%, +9.63%] (days 11, n 246) fills 357 -> KILL
+   events that count only because of deviation 6: ['KXBTCD-26NOV1117', 'KXBTCD-26NOV1217']
