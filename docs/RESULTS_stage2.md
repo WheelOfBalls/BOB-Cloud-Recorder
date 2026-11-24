@@ -1,6 +1,6 @@
 # Stage 2 result: KILL
 
-Run once on 2026-11-24 00:04 UTC with the frozen `analyze_stage2.py` (sha256 `3e8dd8fa…dfe5`, matches `analysis/FROZEN_stage2.md`; the same hash is recorded in `results/stage2/stage2_results.json`). Pre-run checks and one known departure are in `results/stage2/PRE_RUN_NOTE.md`, committed before the run.
+Run once on 2026-11-24 00:04 UTC with the frozen `analyze_stage2.py` (sha256 `3e8dd8fa…dfe5`, matches `analysis/FROZEN_stage2.md`; the same hash is recorded in `results/stage2/stage2_results.json`). Pre-run checks and one known departure are in `results/stage2/PRE_RUN_NOTE.md`, committed and pushed (2362b3bf, 00:04:13 UTC) before the run was started. That note says "~00:20 UTC"; that estimate was wrong, the commit time is the record.
 
 The test is complete: 13 settled 5pm events qualify on the merged series (Nov 6 to Nov 18; 10 needed), 51,190 rows.
 
