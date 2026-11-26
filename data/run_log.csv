@@ -1817,3 +1817,4 @@ utc,btc_options,eth_options,kxbtcd_markets,kxethd_markets,books,books_truncated,
 2026-11-26T08:12:30.036156+00:00,232,210,130,90,0,0,0.25,0.24,1,1,1.5,20327,0,
 2026-11-26T08:17:30.035991+00:00,232,210,0,90,0,0,,0.33,0,1,5.5,13678,2,://api.elections.kalshi.com/trade-api/v2/markets: HTTP Error 500: Internal Server Error | ://api.elections.kalshi.com/trade-api/v2/markets: HTTP Error 500: Internal Server Error
 2026-11-26T08:22:30.036018+00:00,232,210,0,0,0,0,,,0,0,6.8,11800,3,://api.elections.kalshi.com/trade-api/v2/markets: HTTP Error 500: Internal Server Error | ://api.elections.kalshi.com/trade-api/v2/markets: HTTP Error 500: Internal Server Error | ://api.elections.kalshi.com/trade-api/v2/markets: HTTP Error 500: Internal Server Error
+2026-11-26T08:27:30.036157+00:00,232,210,130,90,0,0,0.24,0.23,1,1,1.7,20167,0,
